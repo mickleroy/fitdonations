@@ -41,3 +41,13 @@ swagger:
     contact:
     license: Apache 2.0
     licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.html
+    
+fitbit:
+    clientConsumerKey: 2f4ac84d9282434084fff5c23b2aeb92
+    clientSecret: 6564439417104201a920b4dd3bf0cd83
+    baseUrl: https://www.fitbit.com
+    apiUrl: https://api.fitbit.com
+    webAppUrl: http://www.fitdonate.co
+    requestTokenPath: /oauth/request_token
+    authorizePath: /oauth/authorize
+    accessTokenPath: /oauth/access_token

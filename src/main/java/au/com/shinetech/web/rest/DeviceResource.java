@@ -1,10 +1,13 @@
 
 package au.com.shinetech.web.rest;
 
+import au.com.shinetech.config.FitBitConfiguration;
+import au.com.shinetech.domain.Activity;
 import au.com.shinetech.domain.Device;
 import au.com.shinetech.domain.User;
 import au.com.shinetech.repository.DeviceRepository;
 import au.com.shinetech.repository.UserRepository;
+import au.com.shinetech.service.DeviceService;
 import au.com.shinetech.service.MailService;
 import au.com.shinetech.service.UserService;
 import com.codahale.metrics.annotation.Timed;
@@ -41,10 +44,13 @@ import java.util.Optional;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriComponents;
 
 
 @RestController
@@ -65,16 +71,11 @@ public class DeviceResource {
     @Inject
     private DeviceRepository deviceRepository;
     
-    private static final String CLIENT_CONSUMER_KEY = "2f4ac84d9282434084fff5c23b2aeb92";
-    private static final String CLIENT_SECRET = "6564439417104201a920b4dd3bf0cd83";
+    @Inject
+    private DeviceService deviceService;
     
-    private static final String FITBIT_BASE_URL = "https://www.fitbit.com";
-    private static final String FITBIT_API_URL = "https://api.fitbit.com";
-    private static final String WEBAPP_URL = "http://www.fitdonate.co";
-    
-    private static final String FITBIT_REQUEST_TOKEN = "/oauth/request_token";
-    private static final String FITBIT_AUTHORIZE = "/oauth/authorize";
-    private static final String FITBIT_ACCESS_TOKEN = "/oauth/access_token";
+    @Inject
+    private FitBitConfiguration.FitBitConfig fitBitConfig;
     
     /**
      * POST  /devices -> Create a new device.
@@ -149,13 +150,13 @@ public class DeviceResource {
             // retrieve temporary token from fitbit
             HttpTransport transport = new ApacheHttpTransport();
             OAuthHmacSigner signer = new OAuthHmacSigner();
-            signer.clientSharedSecret = CLIENT_SECRET;
+            signer.clientSharedSecret = fitBitConfig.getClientSecret();
 
-            OAuthGetTemporaryToken tempTokenRequest = new OAuthGetTemporaryToken(FITBIT_API_URL+FITBIT_REQUEST_TOKEN);
-            tempTokenRequest.consumerKey = CLIENT_CONSUMER_KEY;
+            OAuthGetTemporaryToken tempTokenRequest = new OAuthGetTemporaryToken(fitBitConfig.getApiUrl()+fitBitConfig.getRequestTokenPath());
+            tempTokenRequest.consumerKey = fitBitConfig.getClientConsumerKey();
             tempTokenRequest.transport = transport;
             tempTokenRequest.signer = signer;
-            tempTokenRequest.callback = WEBAPP_URL + "/api/device/authorize?userId="+userId;
+            tempTokenRequest.callback = fitBitConfig.getWebAppUrl() + "/api/device/authorize?userId="+userId;
             OAuthCredentialsResponse credResponse = tempTokenRequest.execute();
 
             // store secret token in database for HMAC-SHA1 signing
@@ -174,7 +175,7 @@ public class DeviceResource {
             userRepository.save(user);
 
             // redirect user to fitbit for authorization
-            OAuthAuthorizeTemporaryTokenUrl authTempTokenRequest = new OAuthAuthorizeTemporaryTokenUrl(FITBIT_BASE_URL+FITBIT_AUTHORIZE);
+            OAuthAuthorizeTemporaryTokenUrl authTempTokenRequest = new OAuthAuthorizeTemporaryTokenUrl(fitBitConfig.getBaseUrl()+fitBitConfig.getAuthorizePath());
             authTempTokenRequest.temporaryToken = credResponse.token;
                         
             HttpHeaders headers = new HttpHeaders();
@@ -207,11 +208,11 @@ public class DeviceResource {
             // exchange temporary token for access token
             HttpTransport transport = new ApacheHttpTransport();
             OAuthHmacSigner signer = new OAuthHmacSigner();
-            signer.clientSharedSecret = CLIENT_SECRET;
+            signer.clientSharedSecret = fitBitConfig.getClientSecret();
             signer.tokenSharedSecret = user.getDevice().getSecretToken();
 
-            OAuthGetAccessToken accessTokenRequest = new OAuthGetAccessToken(FITBIT_API_URL+FITBIT_ACCESS_TOKEN);
-            accessTokenRequest.consumerKey = CLIENT_CONSUMER_KEY;
+            OAuthGetAccessToken accessTokenRequest = new OAuthGetAccessToken(fitBitConfig.getApiUrl()+fitBitConfig.getAccessTokenPath());
+            accessTokenRequest.consumerKey = fitBitConfig.getClientConsumerKey();
             accessTokenRequest.transport = transport;
             accessTokenRequest.signer = signer;
             accessTokenRequest.temporaryToken = callbackParser.token;
@@ -238,36 +239,29 @@ public class DeviceResource {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
-    @RequestMapping(value = "/device/activities/{date}",
+    @RequestMapping(value = "/device/activities/{startDate}/{endDate}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<?> getActivities(@RequestParam String userId, 
-                                          @PathVariable String date,
+    public ResponseEntity<?> getActivities(@RequestParam String userId,
+                                            @PathVariable String startDate,
+                                          @PathVariable String endDate,
                                           HttpServletRequest request) {
         try {
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
             // get the user
             User user = userRepository.findOne(Long.valueOf(userId));
             
-            // build request to retrieve activities from fitbit
-            OAuthHmacSigner signer = new OAuthHmacSigner();
-            signer.clientSharedSecret = CLIENT_SECRET;
-            signer.tokenSharedSecret = user.getDevice().getSecretToken();
+            JSONObject json = deviceService.getActivities(user, 
+                                            Activity.Distance, 
+                                            formatter.parseDateTime(startDate), 
+                                            formatter.parseDateTime(endDate));
 
-            OAuthParameters params = new OAuthParameters();
-            params.signer = signer;
-            params.consumerKey = CLIENT_CONSUMER_KEY;
-            params.token = user.getDevice().getAccessToken();
-
-            HttpRequestFactory factory = new ApacheHttpTransport().createRequestFactory(params);
-            HttpRequest httpReq = factory.buildGetRequest(
-                    new GenericUrl(FITBIT_API_URL+"/1/user/-/activities/date/"+date+".json"));
-            HttpResponse response = httpReq.execute();
-            String jsonResponse = IOUtils.toString(response.getContent());
-
-            return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+            return new ResponseEntity<>(json.toString(), HttpStatus.OK);
         } catch(IOException ex) {
             log.error("Could not retrieve device information");
+        } catch (JSONException ex) {
+            log.error("Invalid JSON response", ex);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
