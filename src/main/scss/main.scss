@@ -144,13 +144,17 @@ footer {
     border: none;
     border-radius: 0;
 
-    span {
-        color: white;
+    .nav-pills > li > a {
+        border-radius: 0;
     }
     
     .btn {
         color: white !important;
         background: $bg-lightblue !important;
+    }
+    
+    .dropdown-toggle {
+        background-color: $bg-lightblue !important;
     }
 }
 

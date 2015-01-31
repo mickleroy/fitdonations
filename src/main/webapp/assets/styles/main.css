@@ -8030,33 +8030,37 @@ footer a:hover {
   border-radius: 0;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003147}}
-.navbar span {
-  color: white;
+.navbar .nav-pills > li > a {
+  border-radius: 0;
 }
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003151}}
 .navbar .btn {
   color: white !important;
   background: #4166a1 !important;
 }
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003156}}
+.navbar .dropdown-toggle {
+  background-color: #4166a1 !important;
+}
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003157}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003161}}
 .jumbotron {
   background-image: url("../images/banner.jpg");
   background-repeat: no-repeat;
   background-size: cover;
   height: 400px;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003163}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003167}}
 .jumbotron h1 {
   color: white;
   text-transform: uppercase;
   text-shadow: 0px 1px 10px rgba(0, 0, 0, 0.5);
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003169}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003173}}
 .jumbotron p {
   color: white;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003173}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003177}}
 .jumbotron .btn {
   background: transparent;
   color: white !important;
@@ -8064,11 +8068,11 @@ footer a:hover {
   border-radius: 5px;
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003179}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003183}}
 .list-group .list-group-item-heading {
   color: #2C5697;
 }
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003182}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003186}}
 .list-group .list-group-item-heading .glyphicon {
   margin-right: 10px;
 }
