@@ -1,2 +1,2 @@
-# fitdonations
-Keeping fit for a good cause
+README for fitdonations
+==========================
