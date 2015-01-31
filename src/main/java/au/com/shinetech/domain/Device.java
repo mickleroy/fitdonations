@@ -1,11 +1,9 @@
 package au.com.shinetech.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Date;
 
 /**
  * A Device.
@@ -24,6 +22,10 @@ public class Device implements Serializable {
     @Column(name = "secret_token")
     private String secretToken;
 
+    @Column(name = "date_added")
+    @Temporal(TemporalType.DATE)
+    private Date dateAdded;
+    
     @OneToOne(mappedBy = "device")
     private User user;
 
@@ -51,6 +53,14 @@ public class Device implements Serializable {
         this.secretToken = secretToken;
     }
 
+    public Date getDateAdded() {
+        return dateAdded;
+    }
+
+    public void setDateAdded(Date dateAdded) {
+        this.dateAdded = dateAdded;
+    }
+    
     public User getUser() {
         return user;
     }
