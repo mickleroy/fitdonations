@@ -8056,3 +8056,12 @@ footer a:hover {
   border: 2px solid white;
   border-radius: 5px;
 }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003165}}
+.list-group .list-group-item-heading {
+  color: #2C5697;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/michael\/NetBeansProjects\/fitdonations\/src\/main\/scss\/main\.scss}line{font-family:\00003168}}
+.list-group .list-group-item-heading .glyphicon {
+  margin-right: 10px;
+}
