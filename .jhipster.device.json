@@ -1,0 +1,34 @@
+{
+    "relationships": [
+        {
+            "relationshipId": 1,
+            "otherEntityName": "user",
+            "relationshipType": "one-to-one",
+            "otherEntityNameCapitalized": "User",
+            "ownerSide": false
+        }
+    ],
+    "fields": [
+        {
+            "fieldId": 1,
+            "fieldName": "accessToken",
+            "fieldType": "String",
+            "fieldNameCapitalized": "AccessToken",
+            "fieldNameUnderscored": "access_token"
+        },
+        {
+            "fieldId": 2,
+            "fieldName": "secretToken",
+            "fieldType": "String",
+            "fieldNameCapitalized": "SecretToken",
+            "fieldNameUnderscored": "secret_token"
+        }
+    ],
+    "fieldsContainOwnerManyToMany": false,
+    "fieldsContainOneToMany": false,
+    "fieldsContainLocalDate": false,
+    "fieldsContainCustomTime": false,
+    "fieldsContainBigDecimal": false,
+    "fieldsContainDateTime": false,
+    "changelogDate": "20150131150916"
+}

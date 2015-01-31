@@ -1,0 +1,70 @@
+
+<div>
+    <h2><span translate="fitdonationsApp.challenge.detail.title">Challenge</span> {{challenge.id}}</h2>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th translate="entity.detail.field">Field</th>
+                    <th translate="entity.detail.value">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.amount">Amount</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.amount}}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.distance">Distance</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.distance}}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.startDate">StartDate</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.startDate}}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.endDate">EndDate</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.endDate}}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.user">user</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.user.id}}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span translate="fitdonationsApp.challenge.charity">charity</span>
+                    </td>
+                    <td>
+                        <input type="text" class="input-sm form-control" value="{{challenge.charity.id}}" readonly>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit"
+            ui-sref="challenge"
+            class="btn btn-info">
+        <span class="glyphicon glyphicon-arrow-left"></span>&nbsp;<span translate="entity.action.back"> Back</span>
+    </button>
+</div>

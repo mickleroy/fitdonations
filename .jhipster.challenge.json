@@ -1,0 +1,55 @@
+{
+    "relationships": [
+        {
+            "relationshipId": 1,
+            "otherEntityName": "user",
+            "relationshipType": "many-to-one",
+            "otherEntityNameCapitalized": "User",
+            "otherEntityField": "id"
+        },
+        {
+            "relationshipId": 2,
+            "otherEntityName": "charity",
+            "relationshipType": "many-to-one",
+            "otherEntityNameCapitalized": "Charity",
+            "otherEntityField": "id"
+        }
+    ],
+    "fields": [
+        {
+            "fieldId": 1,
+            "fieldName": "amount",
+            "fieldType": "BigDecimal",
+            "fieldNameCapitalized": "Amount",
+            "fieldNameUnderscored": "amount"
+        },
+        {
+            "fieldId": 2,
+            "fieldName": "distance",
+            "fieldType": "Integer",
+            "fieldNameCapitalized": "Distance",
+            "fieldNameUnderscored": "distance"
+        },
+        {
+            "fieldId": 3,
+            "fieldName": "startDate",
+            "fieldType": "DateTime",
+            "fieldNameCapitalized": "StartDate",
+            "fieldNameUnderscored": "start_date"
+        },
+        {
+            "fieldId": 4,
+            "fieldName": "endDate",
+            "fieldType": "DateTime",
+            "fieldNameCapitalized": "EndDate",
+            "fieldNameUnderscored": "end_date"
+        }
+    ],
+    "fieldsContainOwnerManyToMany": false,
+    "fieldsContainOneToMany": false,
+    "fieldsContainLocalDate": false,
+    "fieldsContainCustomTime": true,
+    "fieldsContainBigDecimal": true,
+    "fieldsContainDateTime": true,
+    "changelogDate": "20150131150715"
+}

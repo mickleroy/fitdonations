@@ -1,0 +1,80 @@
+package au.com.shinetech.web.rest;
+
+import com.codahale.metrics.annotation.Timed;
+import au.com.shinetech.domain.Challenge;
+import au.com.shinetech.repository.ChallengeRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.inject.Inject;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * REST controller for managing Challenge.
+ */
+@RestController
+@RequestMapping("/api")
+public class ChallengeResource {
+
+    private final Logger log = LoggerFactory.getLogger(ChallengeResource.class);
+
+    @Inject
+    private ChallengeRepository challengeRepository;
+
+    /**
+     * POST  /challenges -> Create a new challenge.
+     */
+    @RequestMapping(value = "/challenges",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public void create(@RequestBody Challenge challenge) {
+        log.debug("REST request to save Challenge : {}", challenge);
+        challengeRepository.save(challenge);
+    }
+
+    /**
+     * GET  /challenges -> get all the challenges.
+     */
+    @RequestMapping(value = "/challenges",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public List<Challenge> getAll() {
+        log.debug("REST request to get all Challenges");
+        return challengeRepository.findAll();
+    }
+
+    /**
+     * GET  /challenges/:id -> get the "id" challenge.
+     */
+    @RequestMapping(value = "/challenges/{id}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<Challenge> get(@PathVariable Long id) {
+        log.debug("REST request to get Challenge : {}", id);
+        return Optional.ofNullable(challengeRepository.findOne(id))
+            .map(challenge -> new ResponseEntity<>(
+                challenge,
+                HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * DELETE  /challenges/:id -> delete the "id" challenge.
+     */
+    @RequestMapping(value = "/challenges/{id}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public void delete(@PathVariable Long id) {
+        log.debug("REST request to delete Challenge : {}", id);
+        challengeRepository.delete(id);
+    }
+}
