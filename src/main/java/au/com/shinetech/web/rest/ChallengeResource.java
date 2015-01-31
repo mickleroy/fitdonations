@@ -67,8 +67,6 @@ public class ChallengeResource {
         challenge.setFinished(false);
         challengeRepository.save(challenge);
 
-        makePayment(challenge.getAmount(), challenge.getUser());
-
         log.info("Save challenge [" + challenge + "]");
     }
 

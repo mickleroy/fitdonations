@@ -59,17 +59,6 @@ public class AccountResource {
             .orElseGet(() -> userRepository.findOneByEmail(userDTO.getEmail())
                 .map(user -> new ResponseEntity<>("e-mail address already in use", HttpStatus.BAD_REQUEST))
                 .orElseGet(() -> {
-                    // process zero dollar transac to get user token in vault for re-use later
-                    /*TransactionRequest transactionRequest = new TransactionRequest()
-                            .amount(new BigDecimal("1.00"))
-                            .paymentMethodNonce(userDTO.getPaymentMethodNonce())
-                            .options()
-                                .storeInVaultOnSuccess(true)
-                                .done();
-
-                    Result<Transaction> result = WebConfigurer.gateway.transaction().sale(transactionRequest);*/
-
-
                     CustomerRequest customerRequest = new CustomerRequest()
                             .firstName(userDTO.getFirstName())
                             .lastName(userDTO.getLastName())
