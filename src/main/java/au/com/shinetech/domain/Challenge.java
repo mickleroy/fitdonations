@@ -48,6 +48,12 @@ public class Challenge implements Serializable {
     @Column(name = "end_date", nullable = false)
     private DateTime endDate;
 
+    @Column(name="finished")
+    private boolean finished;
+
+    @Column(name="payed")
+    private boolean payed;
+
     @ManyToOne
     private User user;
 
@@ -116,6 +122,22 @@ public class Challenge implements Serializable {
 
     public void setProgress(Integer progress) {
         this.progress = progress;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
+
+    public boolean isPayed() {
+        return payed;
+    }
+
+    public void setPayed(boolean payed) {
+        this.payed = payed;
     }
 
     @Override

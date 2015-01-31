@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    <changeSet author="dooman (generated)" id="1422711745111-1">
+        <addColumn tableName="T_DEVICE">
+            <column name="date_added" type="date"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dooman (generated)" id="1422711745111-2">
+        <addColumn tableName="T_CHALLENGE">
+            <column name="finished" type="boolean"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

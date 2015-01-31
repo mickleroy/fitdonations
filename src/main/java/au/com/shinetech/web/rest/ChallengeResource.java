@@ -64,6 +64,7 @@ public class ChallengeResource {
         challenge.setEndDate(new DateTime(getEndDate(challengeDTO)));
         challenge.setCharity(charityRepository.findOne(challengeDTO.getCharityId()));
         challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
+        challenge.setFinished(false);
         challengeRepository.save(challenge);
         log.info("Save challenge [" + challenge + "]");
     }
@@ -102,8 +103,13 @@ public class ChallengeResource {
 
     @RequestMapping(value = "/challenges/progress", method = RequestMethod.GET)
     public List<ProgressDTO> getProgress() {
-        return challengeRepository.findByUserLoginOrderByStartDateDesc(SecurityUtils.getCurrentLogin()).
+        return challengeRepository.findByUserLoginAndFinishedOrderByStartDateDesc(SecurityUtils.getCurrentLogin(), false).
             stream().map(this::progress).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/challenges/finished", method = RequestMethod.GET)
+    public List<Challenge> getFinished() {
+        return challengeRepository.findByUserLoginAndFinishedOrderByStartDateDesc(SecurityUtils.getCurrentLogin(), true);
     }
 
     private ProgressDTO progress(Challenge c) {
