@@ -40,7 +40,8 @@ angular.module('fitdonationsApp')
             braintree.setup(
                 token,
                 'dropin', {
-                    container: "registrationForm",
+                    container: "dropInContainer",
+                    form: "registrationForm",
                     paymentMethodNonceReceived: function (event, nonce) {
                         $scope.registerAccount.paymentMethodNonce = nonce;
                         $scope.register();
