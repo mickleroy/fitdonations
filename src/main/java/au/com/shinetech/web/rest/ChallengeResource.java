@@ -5,9 +5,11 @@ import au.com.shinetech.repository.CharityRepository;
 import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.security.SecurityUtils;
 import au.com.shinetech.web.rest.dto.ChallengeDTO;
+import au.com.shinetech.web.rest.dto.ProgressDTO;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
+import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +21,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing Challenge.
@@ -61,6 +65,23 @@ public class ChallengeResource {
         challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
         challengeRepository.save(challenge);
         log.info("Save challenge [" + challenge + "]");
+    }
+
+    @RequestMapping(value = "/challenges/progress", method = RequestMethod.GET)
+    public List<ProgressDTO> getProgress() {
+        return challengeRepository.findByUserLoginOrderByEndDateDesc(SecurityUtils.getCurrentLogin()).
+            stream().map(this::progress).collect(Collectors.toList());
+    }
+
+    private ProgressDTO progress(Challenge c) {
+        ProgressDTO progress = new ProgressDTO();
+        progress.setDistanceTotal(c.getDistance());
+        progress.setDistanceDone(c.getProgress() == null ? 0 : c.getProgress());
+        progress.setPercentsDone(c.getProgress() == null ? 0 : (int) ( ( (double) c.getProgress() / (double)c.getDistance()) * 100) );
+        progress.setDaysLeft( (int) ( (c.getEndDate().getMillis() - new Date().getTime()) / (24 * 60 * 60 * 1000)));
+        progress.setDistanceLeft(c.getProgress() == null ? c.getDistance() : c.getDistance() - c.getProgress());
+        progress.setAmount(c.getAmount());
+        return progress;
     }
 
     /**

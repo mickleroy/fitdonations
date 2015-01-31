@@ -13,6 +13,7 @@ angular.module('fitdonationsApp')
                     return data;
                 }
             },
-            'newChallenge': {method: 'POST', url: 'api/challenges/new'}
+            'newChallenge': {method: 'POST', url: 'api/challenges/new'},
+            'progress' : {method: 'GET', url: 'api/challenges/progress', isArray: true}
         });
     });
