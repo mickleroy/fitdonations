@@ -1,48 +1,40 @@
 <div ng-cloak>
-    <!--div class="row">
-        <div class="col-md-4">
-            <span class="hipster img-responsive img-rounded"></span>
+    <div class="jumbotron" ng-if="!isAuthenticated()">
+        <div class="container">
+            <h1>Challenge Yourself</h1>
+            <p>Setup your goal and hit it. Otherwise, donate to your favorite charity. Be happy in both cases!</p>
+            <a class="btn btn-info btn-lg" ui-sref="register">Start a Challenge</a>
         </div>
-        <div class="col-md-8">
-            <h1 translate="main.title">Welcome, Java Hipster!</h1>
-            <p class="lead" translate="main.subtitle">This is your homepage</p>
-
-            <div ng-switch="isAuthenticated()">
-                <div class="alert alert-success" ng-switch-when="true"
-                     translate="main.logged.message" translate-values="{username: '{{account.login}}'}">
-                    You are logged in as user "Admin".
-                </div>
-
-                <div class="alert alert-warning" ng-switch-when="false" translate="global.messages.info.authenticated">
-                    If you want to <a href="#/login">authenticate</a>, you can try the default login="admin" and
-                    password="admin".
-                </div>
-
-                <div class="alert alert-warning" ng-switch-when="false" translate="global.messages.info.register">
-                    Don't have an account? <a href=\"#/register\">Register</a>
+    </div>
+    
+    <div class="container" style='margin-bottom: 50px'>
+        <div class="row">
+            <div class="col-md-3">
+                <h3>Join hundreds of people running for a good cause</h3>
+                <p class="lead">This is all about challenging yourself and you know you're doing it for a good cause. 
+                Every time you do not reach your fitness goal, a donation is made on your behalf to the 
+                charity of your choice.</p>
+            </div>
+            <div class="col-md-5">
+                <img class="img-thumbnail" src="/assets/images/group.jpg" style="margin-top: 20px;"/>
+            </div>
+            <div class="col-md-4">
+                <div class="list-group" style="margin-top: 20px">
+                    <div class="list-group-item">
+                      <h4 class="list-group-item-heading">Challenge your friends</h4>
+                      <p class="list-group-item-text">Setup a group and challenge your friends to see who runs the most.</p>
+                    </div>
+                    <div class="list-group-item">
+                      <h4 class="list-group-item-heading">Challenge your friends</h4>
+                      <p class="list-group-item-text">Setup a group and challenge your friends to see who runs the most.</p>
+                    </div>
+                    <div class="list-group-item">
+                      <h4 class="list-group-item-heading">Challenge your friends</h4>
+                      <p class="list-group-item-text">Setup a group and challenge your friends to see who runs the most.</p>
+                    </div>
                 </div>
             </div>
-
-            <p translate="main.question">
-                If you have any question on JHipster:
-            </p>
-
-            <ul>
-                <li><a href="http://jhipster.github.io/" target="_blank" translate="main.link.homepage">JHipster homepage</a></li>
-                <li><a href="http://stackoverflow.com/tags/jhipster/info" target="_blank" translate="main.link.stackoverflow">JHipster on Stack Overflow</a></li>
-                <li><a href="https://github.com/jhipster/generator-jhipster/issues?state=open" target="_blank" translate="main.link.bugtracker">JHipster bug tracker</a></li>
-                <li><a href="https://twitter.com/java_hipster" target="_blank"  translate="main.link.contact">contact @java_hipster on Twitter</a></li>
-            </ul>
-
-            <p>
-             <span translate="main.like">If you like JHipster, don't forget to give us a star on </span>&nbsp;<a href="https://github.com/jhipster/generator-jhipster" target="_blank" translate="main.github">Github</a>!
-            </p>
         </div>
-    </div-->
-    <div class="jumbotron" ng-if="!isAuthenticated()">
-        <h1>Run or Pay!</h1>
-        <p>Setup your goal and hit it. Otherwise, donate to your favorite charity. Be happy in both cases!</p>
-        <p><a class="btn btn-success btn-lg" ui-sref="register">Create Account</a></p>
     </div>
 
     <div ng-if="isAuthenticated()">
