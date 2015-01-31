@@ -4,14 +4,14 @@ server:
 spring:
     profiles:
         active: prod
-    
+
     datasource:
         dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
-        url: 
+        url:
         databaseName: fitdonations
-        serverName: localhost
-        username: fitdonations
-        password: 
+        serverName: br11xcrf5cr236t.cju0tknyfdzn.ap-southeast-2.rds.amazonaws.com
+        username: master
+        password: s4apfes4apfe
 
     jpa:
         database-platform: org.hibernate.dialect.PostgreSQL82Dialect
@@ -26,8 +26,8 @@ spring:
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: false
-            
-            
+
+
 
     mail:
         baseUrl: http://localhost:8080
