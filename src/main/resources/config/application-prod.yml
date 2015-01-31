@@ -8,7 +8,7 @@ spring:
     datasource:
         dataSourceClassName: org.postgresql.ds.PGSimpleDataSource
         url:
-        databaseName: fitdonations
+        databaseName: fitdonate
         serverName: br11xcrf5cr236t.cju0tknyfdzn.ap-southeast-2.rds.amazonaws.com
         username: master
         password: s4apfes4apfe
