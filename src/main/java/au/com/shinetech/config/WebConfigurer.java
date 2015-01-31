@@ -1,5 +1,6 @@
 package au.com.shinetech.config;
 
+import com.braintreegateway.BraintreeGateway;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.servlet.InstrumentedFilter;
 import com.codahale.metrics.servlets.MetricsServlet;
@@ -38,6 +39,13 @@ public class WebConfigurer implements ServletContextInitializer, EmbeddedServlet
 
     @Autowired(required = false)
     private MetricRegistry metricRegistry;
+
+    public static BraintreeGateway gateway = new BraintreeGateway(
+            com.braintreegateway.Environment.SANDBOX,
+            "r7rf7j2kqh8vpkc5",
+            "s969xyjkqtxqgwqs",
+            "b17a9042524f75eaa3f4c620d2fcf0d4"
+    );
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
