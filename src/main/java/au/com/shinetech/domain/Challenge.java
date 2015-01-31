@@ -31,6 +31,9 @@ public class Challenge implements Serializable {
     @Column(name = "distance")
     private Integer distance;
 
+    @Column(name = "progress")
+    private Integer progress;
+
     @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     @JsonSerialize(using = CustomDateTimeSerializer.class)
     @JsonDeserialize(using = CustomDateTimeDeserializer.class)
@@ -103,6 +106,14 @@ public class Challenge implements Serializable {
 
     public void setCharity(Charity charity) {
         this.charity = charity;
+    }
+
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Integer progress) {
+        this.progress = progress;
     }
 
     @Override
