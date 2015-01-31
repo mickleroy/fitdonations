@@ -35,13 +35,16 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponents;
 
 
 @RestController
@@ -122,6 +125,11 @@ public class DeviceResource {
     @Timed
     public void delete(@PathVariable Long id) {
         log.debug("REST request to delete Device : {}", id);
+        
+        Device device = deviceRepository.findOne(id);
+        device.getUser().setDevice(null);
+        userRepository.save(device.getUser());
+        
         deviceRepository.delete(id);
     }
     
@@ -156,6 +164,7 @@ public class DeviceResource {
             if(user.getDevice() == null) {
                 device = new Device();
                 device.setSecretToken(credResponse.tokenSecret);
+                device.setDateAdded(new Date());
                 user.setDevice(device);
             } else {
                 device = user.getDevice();
@@ -184,7 +193,8 @@ public class DeviceResource {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<?> postAuthorisation(@RequestParam String userId, 
+    public ResponseEntity<?> postAuthorisation(UriComponentsBuilder uriBuilder,
+                                                @RequestParam String userId, 
                                                 HttpServletRequest request) {
         try {
             // parse callback url
@@ -211,13 +221,19 @@ public class DeviceResource {
             // store access token and new secret in session
             user.getDevice().setAccessToken(credResponse.token);
             user.getDevice().setSecretToken(credResponse.tokenSecret);
+            user.getDevice().setDateAdded(new Date());
             deviceRepository.save(user.getDevice());
             
-            return new ResponseEntity<>("Authorisation complete!", HttpStatus.OK);
-        } catch(IOException ex) {
-            log.error("Could not execute request", ex);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(new URI("/#/settings"));
+            
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } catch(IOException ioEx) {
+            log.error("Could not execute request", ioEx);
         } catch (NumberFormatException numEx) {
             log.error("Invalid user id specified", numEx);
+        } catch (URISyntaxException uriEx) {
+            log.error("Could not build url", uriEx);
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }

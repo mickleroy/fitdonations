@@ -1,4 +1,4 @@
-<div>
+<div class="container">
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <h2 translate="settings.title" translate-values="{username: '{{settingsAccount.login}}'}">User settings for [<b>{{settingsAccount.login}}</b>]</h2>
@@ -83,20 +83,25 @@
             </form>
             
             <h3>Devices</h3>
-            <div class="alert alert-info" role="alert" ng-if="settingsAccount.login.device === null">You do not have any devices linked to your account! <a class="pull-right" ui-sref="linkfitbit">Link device now</a></div>
-            <table class="table" ng-if="settingsAccount.login.device !== null">
+            <div class="alert alert-info" role="alert" ng-if="settingsAccount.device === null">
+                You do not have any devices linked to your account! <a class="pull-right" ng-click="linkDevice()">Link device now</a>
+            </div>
+            <table class="table" ng-if="settingsAccount.device !== null">
                 <tr>
                     <th>Date Linked</th>
                     <th>Description</th>
                     <th>Access Token</th>
+                    <th></th>
                 </tr>
                 <tr>
-                    <td>{{settingsAccount.login.device.dateAdded}}</td>
-                    <td>{{settingsAccount.login.device.description}}</td>
-                    <td>{{settingsAccount.login.device.accessToken}}</td>
+                    <td>{{settingsAccount.device.dateAdded | date:'yyyy-MM-dd'}}</td>
+                    <td>{{settingsAccount.device.description}}</td>
+                    <td>{{settingsAccount.device.accessToken}}</td>
+                    <td><a href="#" ng-click="remove(settingsAccount.device.id)" class="btn btn-danger">Remove</a></td>
                 </tr>
             </table>
         </div>
     </div>
-
+    <!-- push footer down -->
+    <div style="height: 100px"></div>
 </div>

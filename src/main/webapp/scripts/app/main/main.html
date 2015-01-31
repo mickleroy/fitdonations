@@ -50,7 +50,15 @@
         </div>
         <h1>Your current progress:</h1>
         <div ng-repeat="p in progress">
-            <h2 style="color: red">{{p.daysLeft}} days left.</h2>
+            <h2 style="color: red; text-align: center">
+                <timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>
+            </h2>
+        </div>
+        <div style="text-align: center">
+            <canvas id="myChart" height="400" width="600"></canvas>
+        </div>
+
+        <div ng-repeat="p in progress">
             <div class="progress">
                 <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
                      style="width: {{p.percentsDone}}%">

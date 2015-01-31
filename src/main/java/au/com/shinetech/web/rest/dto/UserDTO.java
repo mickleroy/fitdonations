@@ -7,9 +7,12 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.List;
+import javax.annotation.Nullable;
 
 public class UserDTO {
 
+    private Long id;
+    
     @Pattern(regexp = "^[a-z0-9]*$")
     @NotNull
     @Size(min = 1, max = 50)
@@ -34,13 +37,15 @@ public class UserDTO {
 
     private List<String> roles;
     
+    @Nullable
     private DeviceDTO device;
 
     public UserDTO() {
     }
 
-    public UserDTO(String login, String password, String firstName, String lastName, String email, String langKey,
+    public UserDTO(Long id, String login, String password, String firstName, String lastName, String email, String langKey,
                    Device device, List<String> roles) {
+        this.id = id;
         this.login = login;
         this.password = password;
         this.firstName = firstName;
@@ -49,6 +54,10 @@ public class UserDTO {
         this.langKey = langKey;
         this.roles = roles;
         this.device = device != null ? new DeviceDTO(device) : null;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getPassword() {

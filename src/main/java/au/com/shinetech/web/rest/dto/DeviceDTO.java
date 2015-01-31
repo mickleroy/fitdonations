@@ -10,19 +10,24 @@ import java.util.Date;
  */
 public class DeviceDTO {
     
+    private Long id;
     private Date dateAdded;
     private String description;
     private String accessToken;
 
     public DeviceDTO(Device device) {
-        if(device != null) {
-            this.dateAdded = new Date();
-            this.description = "Fitbit";
-            this.accessToken = device.getAccessToken();
-        } else {
-            this.description = "";
-            this.accessToken = "";
-        }
+        this.id = device.getId();
+        this.dateAdded = device.getDateAdded();
+        this.description = "Fitbit";
+        this.accessToken = device.getAccessToken();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
     
     public String getDescription() {
@@ -39,5 +44,13 @@ public class DeviceDTO {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public Date getDateAdded() {
+        return dateAdded;
+    }
+
+    public void setDateAdded(Date dateAdded) {
+        this.dateAdded = dateAdded;
     }
 }
