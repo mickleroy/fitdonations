@@ -56,6 +56,9 @@ public class Challenge implements Serializable {
 
     @ManyToOne
     private Charity charity;
+    
+    @Column(name = "payment_msg", nullable = true)
+    private String paymentMessage;
 
     public Long getId() {
         return id;
@@ -135,6 +138,14 @@ public class Challenge implements Serializable {
 
     public void setPayed(boolean payed) {
         this.payed = payed;
+    }
+
+    public String getPaymentMessage() {
+        return paymentMessage;
+    }
+
+    public void setPaymentMessage(String paymentMessage) {
+        this.paymentMessage = paymentMessage;
     }
 
     @Override

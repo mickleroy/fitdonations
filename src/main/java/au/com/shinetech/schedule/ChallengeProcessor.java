@@ -4,10 +4,13 @@ package au.com.shinetech.schedule;
 import au.com.shinetech.domain.Activity;
 import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
+import au.com.shinetech.service.ChallengeService;
 import au.com.shinetech.service.DeviceService;
+import com.braintreegateway.Result;
+import com.braintreegateway.Transaction;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.logging.Level;
 import javax.inject.Inject;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -26,6 +29,9 @@ public class ChallengeProcessor {
     private ChallengeRepository challengeRepository;
     
     @Inject
+    private ChallengeService challengeService;
+    
+    @Inject
     private DeviceService deviceService;
     
     private final Logger log = LoggerFactory.getLogger(ChallengeProcessor.class);
@@ -40,19 +46,25 @@ public class ChallengeProcessor {
         List<Challenge> challengesToProcess = challengeRepository.findAllForProcessing();
         
         for(Challenge challenge : challengesToProcess) {
-            int targetDistance = challenge.getDistance();
+            
             try {
+                log.info("Processing challenge {}", challenge.getId());
+                int targetDistance = challenge.getDistance();
                 Long totalDistanceCovered = deviceService.getActivityTotal(challenge.getUser(), 
                                                                         Activity.Distance,
                                                                         challenge.getStartDate(),
                                                                         challenge.getEndDate());
                 if(targetDistance > totalDistanceCovered) {
                     // make a donation
-                    challenge.setPayed(true);
-                } else {
-                    challenge.setPayed(false);
+                    Result<Transaction> result = challengeService.makePayment(challenge.getAmount(), 
+                                                                              challenge.getUser());
+                    challenge.setPaymentMessage(result.getTarget().getProcessorResponseCode() + " - " + 
+                                                result.getTarget().getProcessorSettlementResponseText());
+                    
+                    if(result.isSuccess()){
+                        challenge.setPayed(true);
+                    }
                 }
-                
                 challenge.setFinished(true);
                 challengeRepository.save(challenge);
             } catch (IOException | JSONException ex) {
