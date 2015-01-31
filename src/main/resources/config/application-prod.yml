@@ -27,10 +27,15 @@ spring:
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: false
 
-
-
     mail:
-        baseUrl: http://localhost:8080
+        host: smtp.sendgrid.net
+        port: 587
+        user: sneub
+        password: s4apfes4apfe
+        protocol: smtp
+        tls: false
+        auth: true
+        from: hello@fitdonate.co
 
     thymeleaf:
         mode: XHTML
