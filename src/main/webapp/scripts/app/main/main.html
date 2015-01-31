@@ -43,30 +43,42 @@
         </div>
     </div>
 
-    <div ng-if="isAuthenticated()" class="container" style='margin-top: 50px'>
+    <div ng-if="isAuthenticated()" class="container" style='margin-top: 50px; margin-bottom: 50px'>
         <div class="row">
-            <a class="btn btn-success btn-lg" ui-sref="newchallenge">Start new challenge!</a>
-            <a class="btn btn-success btn-lg" ui-sref="newdonation">Donate!</a>
+            <a class="btn btn-success btn-lg" ui-sref="newchallenge" ng-show="!currentChallenge">Start new challenge!</a>
+            <!--a class="btn btn-success btn-lg" ui-sref="newdonation">Donate!</a-->
         </div>
-        <h1>Your current progress:</h1>
-        <div ng-repeat="p in progress">
-            <h2 style="color: red; text-align: center">
-                <timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>
-            </h2>
-        </div>
-        <div style="text-align: center">
-            <canvas id="myChart" height="400" width="600"></canvas>
-        </div>
+        <div ng-show="currentChallenge">
+            <h1>Your current progress:</h1>
+            <div ng-repeat="p in progress">
+                <h2 style="color: red; text-align: center">
+                    <timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>
+                </h2>
+            </div>
+            <div style="text-align: center">
+                <canvas id="myChart" height="400" width="600"></canvas>
+            </div>
 
-        <div ng-repeat="p in progress">
-            <div class="progress">
-                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
-                     style="width: {{p.percentsDone}}%">
-                    <span class="sr-only">{{p.percentsDone}}% Complete (success)</span>
-                    {{p.percentsDone}}%
+            <div ng-repeat="p in progress">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
+                         style="width: {{p.percentsDone}}%">
+                        <span class="sr-only">{{p.percentsDone}}% Complete (success)</span>
+                        {{p.percentsDone}}%
+                    </div>
+
+                    Run {{p.distanceLeft}} meters more or pay {{p.amount}}$
                 </div>
-
-                Run {{p.distanceLeft}} meters more or pay {{p.amount}}$
+            </div>
+        </div>
+        <div ng-show="finished" style="margin-top: 20px; margin-left: -15px">
+            <div ng-repeat="f in finished">
+                <div ng-if="f.payed" class="alert alert-danger">
+                    You didn't run {{f.distance}} and payed {{f.amount}}$ for that.
+                </div>
+                <div ng-if="!f.payed" class="alert alert-success">
+                    Congratulations! You successfully ran {{f.distance}}!
+                </div>
             </div>
         </div>
     </div>

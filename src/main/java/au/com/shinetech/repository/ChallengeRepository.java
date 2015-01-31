@@ -9,5 +9,5 @@ import java.util.List;
  * Spring Data JPA repository for the Challenge entity.
  */
 public interface ChallengeRepository extends JpaRepository<Challenge,Long>{
-    List<Challenge> findByUserLoginOrderByStartDateDesc(String login);
+    List<Challenge> findByUserLoginAndFinishedOrderByStartDateDesc(String login, boolean finished);
 }

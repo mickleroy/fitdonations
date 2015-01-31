@@ -14,6 +14,7 @@ angular.module('fitdonationsApp')
                 }
             },
             'newChallenge': {method: 'POST', url: 'api/challenges/new'},
-            'progress' : {method: 'GET', url: 'api/challenges/progress', isArray: true}
+            'progress' : {method: 'GET', url: 'api/challenges/progress', isArray: true},
+            'finished' : {method: 'GET', url: 'api/challenges/finished', isArray: true}
         });
     });
