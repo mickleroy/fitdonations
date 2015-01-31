@@ -1,5 +1,7 @@
 package au.com.shinetech.web.rest;
 
+import au.com.shinetech.config.WebConfigurer;
+import com.braintreegateway.ClientTokenRequest;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Authority;
 import au.com.shinetech.domain.User;
@@ -118,6 +120,19 @@ public class AccountResource {
                 ),
                 HttpStatus.OK))
             .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    /**
+     * GET  /account/getClientToken -> get the current user's client token.
+     */
+    @RequestMapping(value = "/account/getClientToken",
+            method = RequestMethod.GET,
+            produces = MediaType.TEXT_PLAIN_VALUE)
+    @Timed
+    public String getClientToken() {
+        ClientTokenRequest clientTokenRequest = new ClientTokenRequest();
+//                .customerId(SecurityUtils.getCurrentLogin());
+        return WebConfigurer.gateway.clientToken().generate(clientTokenRequest);
     }
 
     /**

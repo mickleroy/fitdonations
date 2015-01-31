@@ -1,11 +1,13 @@
 package au.com.shinetech.web.rest;
 
+import au.com.shinetech.config.WebConfigurer;
 import au.com.shinetech.domain.User;
 import au.com.shinetech.repository.CharityRepository;
 import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.security.SecurityUtils;
 import au.com.shinetech.web.rest.dto.ChallengeDTO;
 import au.com.shinetech.web.rest.dto.ProgressDTO;
+import com.braintreegateway.*;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
@@ -65,6 +67,19 @@ public class ChallengeResource {
         challenge.setFinished(false);
         challengeRepository.save(challenge);
         log.info("Save challenge [" + challenge + "]");
+    }
+
+    @RequestMapping(value = "/challenges/donate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void donate(@RequestParam(value="payment_method_nonce") String paymentMethodNonce) {
+
+
+        TransactionRequest request = new TransactionRequest()
+                .amount(new BigDecimal("10.00"))
+                .paymentMethodNonce(paymentMethodNonce)
+                .customerId("customerLogin");
+
+        Result<Transaction> result = WebConfigurer.gateway.transaction().sale(request);
+
     }
 
     private Date getEndDate(ChallengeDTO challengeDTO) {

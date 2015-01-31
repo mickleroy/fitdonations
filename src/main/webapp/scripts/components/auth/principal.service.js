@@ -1,9 +1,10 @@
 'use strict';
 
 angular.module('fitdonationsApp')
-    .factory('Principal', function Principal($q, Account, Tracker) {
+    .factory('Principal', function Principal($q, Account, Tracker, $http) {
         var _identity,
-            _authenticated = false;
+            _authenticated = false,
+            _clientToken;
 
         return {
             isIdentityResolved: function () {
@@ -35,6 +36,25 @@ angular.module('fitdonationsApp')
             authenticate: function (identity) {
                 _identity = identity;
                 _authenticated = identity !== null;
+            },
+            clientToken: function() {
+                var deferred = $q.defer();
+
+                // check and see if we have retrieved the identity data from the server.
+                // if we have, reuse it by immediately resolving
+                if (angular.isDefined(_clientToken)) {
+                    deferred.resolve(_clientToken);
+
+                    return deferred.promise;
+                }
+
+                $http({method: "GET", url: 'api/account/getClientToken'}).
+                    success(function(token){
+                        _clientToken = token;
+                        deferred.resolve(_clientToken);
+                    });
+
+                return deferred.promise;
             },
             identity: function (force) {
                 var deferred = $q.defer();
