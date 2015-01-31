@@ -1,0 +1,783 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Build a VPC framework for application environment",
+
+    "Parameters": {
+        "RegionName":       { "Type": "String", "Description": "Geographical location abbreviation i.e syd = Sydney" },
+        "AlertsEmail":      { "Type": "String", "Description": "Email address for alerts" },
+        "SSLCertificateId": { "Type": "String", "Description": "Pre-existing SSL certificate to use for ELB front-end" },
+        "AppName":          { "Type": "String", "Description": "Name of the cool app" },
+        "TagPrefix":        { "Type": "String", "Description": "Prefix for the tags for all the things in the cloud" },
+        "FileBucket":       { "Type": "String", "Description": "The name of the S3 bucket to pull the required files from" },
+        "AMI":              { "Type": "String", "Description": "AMI type for Bastion/NAT type hosts" },
+        "DbUsername":       { "Type": "String", "Description": "Master username for RDS DB instance" },
+        "DbPassword":       { "Type": "String", "Description": "Master password for RDS DB instance" },
+
+        "AvailabilityZone": {
+            "Type": "String", "Description": "The availability zone for the NAT/Bastion instance",
+            "AllowedValues": [ "a", "b" ],
+            "Default": "a"
+        },
+
+        "KeyPairName": {
+            "Type": "String", "Description": "The SSH key pair that will be installed for ec2-user",
+            "Default": "battlehack"
+        }
+    },
+
+    "Conditions": {
+        "AvailabilityZoneA": {
+            "Fn::Equals": [
+                { "Ref": "AvailabilityZone" },
+                "a"
+            ]
+        }
+    },
+
+    "Resources": {
+        "VPC": {
+            "Type": "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock": "10.1.0.0/16",
+                "EnableDnsSupport": true,
+                "EnableDnsHostnames": true
+            }
+        },
+
+        "DefaultInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [ { "Ref": "DefaultServerRole" } ]
+            }
+        },
+
+        "DefaultServerRole" : {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": { "Service": "ec2.amazonaws.com" },
+                        "Action": "sts:AssumeRole"
+                    }]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "alert-permissions",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": "sns:Publish",
+                                "Resource": { "Ref":"AlertsTopic" }
+                            } ]
+                        }
+                    },
+                    {
+                        "PolicyName": "bucket-permissions",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": "s3:*",
+                                "Resource": "*"
+                            } ]
+                        }
+                    },
+                    {
+                        "PolicyName": "instance-terminate",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": [ "ec2:TerminateInstances" ],
+                                "Resource": "*",
+                                "Effect": "Allow"
+                            }]
+                        }
+                    },
+                    {
+                        "PolicyName": "monitoring",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudwatch:PutMetricAlarm",
+                                    "cloudwatch:PutMetricData"
+                                ],
+                                "Resource": "*",
+                                "Effect": "Allow"
+                            }]
+                        }
+                    },
+                    {
+                        "PolicyName": "manage-eip",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "ec2:Associate*",
+                                    "route53:*",
+                                    "sqs:*"
+                                ],
+                                "Resource": "*",
+                                "Effect": "Allow"
+                            } ]
+                        }
+                    },
+                    {
+                        "PolicyName": "backups",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "ec2:CreateSnapshot",
+                                    "ec2:DescribeSnapshots",
+                                    "ec2:DeleteSnapshot",
+                                    "ec2:DescribeInstances",
+                                    "ec2:DescribeTags",
+                                    "ec2:DescribeVolumes",
+                                    "ec2:CreateVolume",
+                                    "ec2:DetachVolume",
+                                    "ec2:AttachVolume"
+                                ],
+                                "Resource": "*",
+                                "Effect": "Allow"
+                            }]
+                        }
+                    },
+                    {
+                        "PolicyName": "read-only",
+                        "PolicyDocument": {
+                            "Statement": [ {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "autoscaling:Describe*",
+                                    "cloudformation:DescribeStacks",
+                                    "cloudformation:DescribeStackEvents",
+                                    "cloudformation:DescribeStackResources",
+                                    "cloudformation:GetTemplate",
+                                    "cloudformation:List*",
+                                    "cloudwatch:Describe*",
+                                    "cloudwatch:Get*",
+                                    "cloudwatch:List*",
+                                    "directconnect:Describe*",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:Query",
+                                    "dynamodb:Scan",
+                                    "dynamodb:DescribeTable",
+                                    "dynamodb:ListTables",
+                                    "ec2:Describe*",
+                                    "elasticache:Describe*",
+                                    "elasticloadbalancing:Describe*",
+                                    "iam:List*",
+                                    "iam:Get*",
+                                    "route53:Get*",
+                                    "route53:List*",
+                                    "rds:Describe*",
+                                    "rds:ListTagsForResource",
+                                    "s3:Get*",
+                                    "s3:List*",
+                                    "sdb:GetAttributes",
+                                    "sdb:List*",
+                                    "sdb:Select*",
+                                    "ses:Get*",
+                                    "ses:List*",
+                                    "sns:Get*",
+                                    "sns:List*",
+                                    "sqs:GetQueueAttributes",
+                                    "sqs:ListQueues",
+                                    "sqs:ReceiveMessage"
+                                ],
+                                "Resource": "*"
+                            }]
+                        }
+                    }
+                ]
+            }
+        },
+
+        "AlertsTopic": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "Subscription" : [ { "Endpoint" : { "Ref": "AlertsEmail" }, "Protocol": "email" } ]
+            }
+        },
+
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [ { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "gateway" ] ] } } ]
+            }
+        },
+
+        "GatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "InternetGatewayId": { "Ref": "InternetGateway" }
+            }
+        },
+
+        "SubnetPublicA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "CidrBlock": "10.1.0.0/24",
+                "AvailabilityZone": "ap-southeast-2a",
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "subnet-public-a" ] ] } },
+                    { "Key": "Network", "Value": "Public" }
+                ]
+            }
+        },
+
+        "SubnetPublicB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "CidrBlock": "10.1.1.0/24",
+                "AvailabilityZone": "ap-southeast-2b",
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "subnet-public-b" ] ] } },
+                    { "Key": "Network", "Value": "Public" }
+                ]
+            }
+        },
+
+        "SubnetPrivateA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "CidrBlock": "10.1.2.0/24",
+                "AvailabilityZone": "ap-southeast-2a",
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "subnet-private-a" ] ] } },
+                    { "Key": "Network", "Value": "Private" }
+                ]
+            }
+        },
+
+        "SubnetPrivateB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "CidrBlock": "10.1.3.0/24",
+                "AvailabilityZone": "ap-southeast-2b",
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "subnet-private-b" ] ] } },
+                    { "Key": "Network", "Value": "Private" }
+                ]
+            }
+        },
+
+        "RouteTablePublic": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "routetable-pub" ] ] } },
+                    { "Key": "Network", "Value": "Public" }
+                ]
+            }
+        },
+
+        "RouteTablePrivate": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                },
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "routetable-priv" ] ] } },
+                    { "Key": "Network", "Value": "Private" }
+                ]
+            }
+        },
+
+        "RouteDefaultPublic": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": { "Ref": "RouteTablePublic" },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": { "Ref": "InternetGateway" }
+            }
+        },
+
+        "RouteDefaultPrivate": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": { "Ref": "RouteTablePrivate" },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "InstanceId": { "Ref": "BastionHost" }
+            }
+        },
+
+        "SubnetAssocPublicA": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPublicA" },
+                "RouteTableId": { "Ref": "RouteTablePublic" }
+            }
+        },
+
+        "SubnetAssocPublicB": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPublicB" },
+                "RouteTableId": { "Ref": "RouteTablePublic" }
+            }
+        },
+
+        "SubnetAssocPrivateA": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPrivateA" },
+                "RouteTableId": { "Ref": "RouteTablePrivate" }
+            }
+        },
+
+        "SubnetAssocPrivateB": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPrivateB" },
+                "RouteTableId": { "Ref": "RouteTablePrivate" }
+            }
+        },
+
+        "AclPublic": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "acl-pub" ] ] } }
+                ]
+            }
+        },
+
+        "AclPublicEntryAllLocal": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPublic" },
+                "RuleNumber": "101",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "false",
+                "CidrBlock": "10.1.0.0/16",
+                "PortRange": { "From": "0", "To": "65535" }
+            }
+        },
+
+        "AclPublicEntrySSH": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : { "Ref" : "AclPublic" },
+                "RuleNumber" : "102",
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0",
+                "PortRange" : { "From" : "22", "To" : "22" }
+            }
+        },
+
+        "AclPublicEntryHTTP": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : { "Ref" : "AclPublic" },
+                "RuleNumber" : "103",
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0",
+                "PortRange" : { "From": "80", "To": "80" }
+            }
+        },
+
+        "AclPublicEntryHTTPS": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : { "Ref" : "AclPublic" },
+                "RuleNumber" : "104",
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0",
+                "PortRange" : { "From": "443", "To": "443" }
+            }
+        },
+
+        "AclPublicEntryEphemeral": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : { "Ref" : "AclPublic" },
+                "RuleNumber" : "105",
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0",
+                "PortRange" : { "From" : "1024", "To" : "65535" }
+            }
+        },
+
+        "AclPublicEntryAllOut": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPublic" },
+                "RuleNumber": "101",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": { "From": "0", "To": "65535" }
+            }
+        },
+
+        "AclAssocPublicA": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPublicA" },
+                "NetworkAclId": { "Ref": "AclPublic" }
+            }
+        },
+
+        "AclAssocPublicB": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPublicB" },
+                "NetworkAclId": { "Ref": "AclPublic" }
+            }
+        },
+
+        "AclPrivate": {
+            "Type": "AWS::EC2::NetworkAcl",
+            "Properties": {
+                "VpcId": { "Ref": "VPC" },
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "acl-priv" ] ] } }
+                ]
+            }
+        },
+
+        "AclPrivateEntrySSH": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPrivate" },
+                "RuleNumber": "101",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "false",
+                "CidrBlock": "10.1.0.0/16",
+                "PortRange": { "From": "22", "To": "22" }
+            }
+        },
+
+        "AclPrivateEntryHTTP": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPrivate" },
+                "RuleNumber": "102",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "false",
+                "CidrBlock": "10.1.0.0/16",
+                "PortRange": { "From": "80", "To": "80" }
+            }
+        },
+
+        "AclPrivateEntryHTTPS": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPrivate" },
+                "RuleNumber": "103",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "false",
+                "CidrBlock": "10.1.0.0/16",
+                "PortRange": { "From": "443", "To": "443" }
+            }
+        },
+
+        "AclPrivateEntryEphemeral": {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : { "Ref" : "AclPrivate" },
+                "RuleNumber" : "104",
+                "Protocol" : "6",
+                "RuleAction" : "allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0",
+                "PortRange" : { "From" : "1024", "To" : "65535" }
+            }
+        },
+
+        "AclPrivateEntryAllOut": {
+            "Type": "AWS::EC2::NetworkAclEntry",
+            "Properties": {
+                "NetworkAclId": { "Ref": "AclPrivate" },
+                "RuleNumber": "101",
+                "Protocol": "6",
+                "RuleAction": "ALLOW",
+                "Egress": "true",
+                "CidrBlock": "0.0.0.0/0",
+                "PortRange": { "From": "0", "To": "65535" }
+            }
+        },
+
+        "AclAssocPrivateA": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPrivateA" },
+                "NetworkAclId": { "Ref": "AclPrivate" }
+            }
+        },
+
+        "AclAssocPrivateB": {
+            "Type": "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties": {
+                "SubnetId": { "Ref": "SubnetPrivateB" },
+                "NetworkAclId": { "Ref": "AclPrivate" }
+            }
+        },
+
+        "DefaultSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Default security group",
+                "VpcId": { "Ref": "VPC" },
+                "SecurityGroupIngress": [
+                    { "IpProtocol": "tcp", "FromPort": "22", "ToPort": "22", "CidrIp": "10.1.0.0/16" }
+                ],
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "secgrp-default" ] ] } }
+                ]
+            }
+        },
+
+        "ELBSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group for public load balancer",
+                "VpcId": { "Ref": "VPC" },
+                "SecurityGroupIngress": [
+                    { "IpProtocol": "tcp", "FromPort": "80",  "ToPort": "80", "CidrIp": "0.0.0.0/0" },
+                    { "IpProtocol": "tcp", "FromPort": "443",  "ToPort": "443", "CidrIp": "0.0.0.0/0" }
+                ],
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "secgrp-elb" ] ] } }
+                ]
+            }
+        },
+
+        "TomcatSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group for tomcat servers",
+                "VpcId": { "Ref": "VPC" },
+                "SecurityGroupIngress": [
+                    { "IpProtocol": "tcp", "FromPort": "8080",  "ToPort": "8080", "CidrIp": "0.0.0.0/0"  }
+                ],
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "secgrp-webserver" ] ] } }
+                ]
+            }
+        },
+
+        "BastionSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group for NAT device",
+                "VpcId": { "Ref": "VPC" },
+                "SecurityGroupIngress": [
+                    { "IpProtocol": "tcp", "FromPort": "22", "ToPort": "22", "CidrIp": "0.0.0.0/0" },
+                    { "IpProtocol": "tcp", "FromPort": "0", "ToPort": "65535", "SourceSecurityGroupId": { "Ref": "DefaultSecurityGroup" } }
+                ],
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "secgrp-basnat" ] ] } }
+                ]
+            }
+        },
+
+        "DBSecurityGroup": {
+            "Type": "AWS::RDS::DBSecurityGroup",
+            "Properties": {
+                "EC2VpcId": { "Ref": "VPC" },
+                "DBSecurityGroupIngress": { "EC2SecurityGroupId": { "Ref": "DefaultSecurityGroup" } },
+                "GroupDescription"      : "Security group for PostgreSQL database",
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "secgrp-db" ] ] } }
+                ]
+            }
+        },
+
+        "ELB": {
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+            "Properties": {
+                "Subnets": {
+                    "Fn::If": [
+                        "AvailabilityZoneA",
+                        [ { "Ref": "SubnetPublicA" } ],
+                        [ { "Ref": "SubnetPublicB" } ]
+                    ]
+                },
+                "SecurityGroups": [
+                    { "Ref": "DefaultSecurityGroup" },
+                    { "Ref": "ELBSecurityGroup" }
+                ],
+                "Listeners": [
+                    { "LoadBalancerPort" : "80", "InstancePort" : "8080", "Protocol" : "HTTP", "InstanceProtocol" : "HTTP" },
+                    { "LoadBalancerPort" : "443", "InstancePort" : "8080", "Protocol" : "HTTPS", "InstanceProtocol" : "HTTP", "SSLCertificateId" : { "Ref" : "SSLCertificateId" } }
+                ],
+                "HealthCheck": { "Target": "TCP:8080", "HealthyThreshold": "2", "UnhealthyThreshold": "3", "Interval": "15", "Timeout": "8" }
+            }
+        },
+
+        "BastionHost" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "InstanceType" : "t2.micro",
+                "KeyName" : { "Ref" : "KeyPairName" },
+                "SourceDestCheck" : "false",
+                "ImageId" : { "Ref": "AMI" },
+                "IamInstanceProfile": { "Ref": "DefaultInstanceProfile" },
+                "UserData": { "Fn::Base64": { "Fn::Join": [ "", [
+                    "#!/bin/bash\n",
+                    "apt-get update\n",
+                    "apt-get install python-pip\n",
+                    "pip install --upgrade pip\n",
+                    "pip install --upgrade awscli\n",
+                    "ufw disable\n",
+                    "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE\n",
+                    "echo 1 > /proc/sys/net/ipv4/ip_forward\n",
+                    "echo Australia/Melbourne > /etc/timezone\n",
+                    "dpkg-reconfigure -f noninteractive tzdata\n"
+                ] ] } },
+                "Tags": [
+                    { "Key": "Name", "Value": { "Fn::Join": [ "-", [ { "Ref": "TagPrefix" }, "bastion" ] ] } }
+                ],
+                "NetworkInterfaces" : [{
+                    "AssociatePublicIpAddress" : "true",
+                    "DeviceIndex"              : "0",
+                    "DeleteOnTermination"      : "true",
+                    "SubnetId"                 : { "Ref": "SubnetPublicA" },
+                    "GroupSet"                 : [ { "Ref": "DefaultSecurityGroup" }, { "Ref": "BastionSecurityGroup" } ]
+                }],
+                "DisableApiTermination": "false"
+            }
+        },
+
+        "TomcatLaunchConfig": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Metadata": {
+                "AWS::CloudFormation::Authentication": {
+                    "S3BucketCreds": {
+                        "type": "S3",
+                        "roleName": { "Ref": "DefaultServerRole" },
+                        "buckets": [ { "Ref": "FileBucket" } ]
+                    }
+                },
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "sources": {
+                            "/tmp": { "Fn::Join": [ "", [ "https://s3-ap-southeast-2.amazonaws.com/", { "Ref": "FileBucket" }, "/tomcat.tgz" ] ] }
+                        },
+                        "files": {
+                            "/etc/database.json": {
+                                "owner": "root", "group": "root", "mode": "000644",
+                                "content": {
+                                    "region": { "Ref": "AWS::Region" },
+                                    "dbhost": { "Fn::GetAtt" : [ "RDSInstance" , "Endpoint.Address" ] },
+                                    "dbuser": { "Ref": "DbUsername" },
+                                    "dbpass": { "Ref": "DbPassword" }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "InstanceType": "t2.micro",
+                "ImageId": { "Ref": "AMI" },
+                "SecurityGroups": [ { "Ref": "DefaultSecurityGroup" }, { "Ref": "TomcatSecurityGroup" } ],
+                "KeyName": { "Ref": "KeyPairName" },
+                "IamInstanceProfile": { "Ref": "DefaultInstanceProfile" },
+
+                "UserData": { "Fn::Base64": { "Fn::Join": [ "", [
+                    "#!/bin/bash\n",
+                    "/usr/local/bin/cfn-init -v --resource=TomcatLaunchConfig",
+                    " --stack ",  { "Ref": "AWS::StackName" },
+                    " --region ", { "Ref": "AWS::Region" }, "\n\n",
+                    "echo Australia/Melbourne > /etc/timezone\n",
+                    "dpkg-reconfigure -f noninteractive tzdata\n",
+                    "apt-get update\n",
+                    "apt-get install -y python-pip\n",
+                    "pip install --upgrade pip awscli\n",
+                    "echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections\n",
+                    "echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections\n",
+                    "add-apt-repository -y ppa:webupd8team/java\n",
+                    "apt-get update\n",
+                    "apt-get install -y git oracle-java8-installer oracle-java8-set-default\n",
+                    "/tmp/tomcat/install.sh\n",
+                    "ufw allow 8080\n",
+                    "ufw allow 22\n",
+                    "ufw enable\n"
+                ] ] } }
+            }
+        },
+
+        "TomcatScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "AvailabilityZones": [ { "Fn::Join": [ "", [ { "Ref": "AWS::Region" }, { "Ref": "AvailabilityZone" } ] ] } ],
+                "LaunchConfigurationName": { "Ref": "TomcatLaunchConfig" },
+                "MinSize": "1",
+                "MaxSize": "1",
+                "DesiredCapacity": "1",
+                "LoadBalancerNames": [ { "Ref": "ELB" } ],
+                "VPCZoneIdentifier": {
+                    "Fn::If": [
+                        "AvailabilityZoneA",
+                        [ { "Ref": "SubnetPrivateA" } ],
+                        [ { "Ref": "SubnetPrivateB" } ]
+                    ]
+                },
+                "Tags": [
+                    { "Key": "Name", "PropagateAtLaunch": true, "Value": { "Fn::Join": [ "-", [ { "Ref": "TagPrefix" }, { "Ref": "AppName" } ] ] } }
+                ]
+            }
+        },
+
+        "DBSubnetGroup": {
+            "Type" : "AWS::RDS::DBSubnetGroup",
+            "Properties" : {
+                "DBSubnetGroupDescription" : "Subnet group for RDS instance",
+                "SubnetIds" : [
+                    { "Ref": "SubnetPrivateA" },
+                    { "Ref": "SubnetPrivateB" }
+                ],
+                "Tags" : [
+                    { "Key": "Name", "Value": { "Fn::Join" : [ "-", [ { "Ref": "TagPrefix" }, "subnetgrp-db" ] ] } }
+                ]
+            }
+        },
+
+        "RDSInstance" : {
+            "Type" : "AWS::RDS::DBInstance",
+            "Properties" : {
+                "DBSecurityGroups" : [ { "Ref": "DBSecurityGroup" } ],
+                "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
+                "AllocatedStorage" : "10",
+                "BackupRetentionPeriod": "7",
+                "DBInstanceClass" : "db.t2.micro",
+                "Engine" : "postgres",
+                "LicenseModel" : "postgresql-license",
+                "MasterUsername" : { "Ref": "DbUsername" },
+                "MasterUserPassword" : { "Ref": "DbPassword" },
+                "MultiAZ": "false"
+            },
+            "DeletionPolicy" : "Snapshot"
+        }
+    }
+}

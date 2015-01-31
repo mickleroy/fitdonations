@@ -12,6 +12,7 @@ angular.module('fitdonationsApp')
                     data.endDate = new Date(data.endDate);
                     return data;
                 }
-            }
+            },
+            'newChallenge': {method: 'POST', url: 'api/challenges/new'}
         });
     });
