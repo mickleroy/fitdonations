@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -102,6 +100,24 @@ public class ChallengeResource {
         progress.setDistanceLeft(c.getProgress() == null ? c.getDistance() : c.getDistance() - c.getProgress());
         progress.setAmount(c.getAmount());
         progress.setEndTime(c.getEndDate().getMillis());
+
+        //TODO:
+        Map<String, Integer> metersByDays = new HashMap<>();
+        metersByDays.put("01/01", 2541);
+        metersByDays.put("02/01", 3541);
+        metersByDays.put("03/01", 5001);
+        metersByDays.put("04/01", 6541);
+        metersByDays.put("05/01", 8541);
+        metersByDays.put("06/01", 8941);
+
+        progress.setMeterInDay("01/01", 2541);
+        progress.setMeterInDay("02/01", 3541);
+        progress.setMeterInDay("03/01", 5001);
+        progress.setMeterInDay("04/01", 6541);
+        progress.setMeterInDay("05/01", 8541);
+        progress.setMeterInDay("06/01", 8941);
+        progress.setMetersByDays(metersByDays);
+
         return progress;
     }
 

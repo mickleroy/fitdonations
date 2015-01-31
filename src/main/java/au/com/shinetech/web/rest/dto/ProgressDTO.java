@@ -1,8 +1,29 @@
 package au.com.shinetech.web.rest.dto;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ProgressDTO {
+    private class MeterInDay {
+        public String date;
+        public Integer meters;
+
+        public MeterInDay(String date, Integer meters) {
+            this.date = date;
+            this.meters = meters;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public Integer getMeters() {
+            return meters;
+        }
+    }
+
     private int daysLeft;
     private int percentsDone;
     private int distanceDone;
@@ -10,6 +31,8 @@ public class ProgressDTO {
     private BigDecimal amount;
     private int distanceLeft;
     private long endTime;
+    private List<MeterInDay> metersInDays = new ArrayList<>();
+    private Map<String, Integer> metersByDays;
 
     public int getDaysLeft() {
         return daysLeft;
@@ -57,6 +80,22 @@ public class ProgressDTO {
 
     public void setDistanceLeft(int distanceLeft) {
         this.distanceLeft = distanceLeft;
+    }
+
+    public void setMeterInDay(String day, Integer meters) {
+        metersInDays.add(new MeterInDay(day, meters));
+    }
+
+    public List<MeterInDay> getMetersInDays() {
+        return metersInDays;
+    }
+
+    public Map<String, Integer> getMetersByDays() {
+        return metersByDays;
+    }
+
+    public void setMetersByDays(Map<String, Integer> metersByDays) {
+        this.metersByDays = metersByDays;
     }
 
     public long getEndTime() {
