@@ -89,7 +89,7 @@ public class ChallengeResource {
 
     @RequestMapping(value = "/challenges/progress", method = RequestMethod.GET)
     public List<ProgressDTO> getProgress() {
-        return challengeRepository.findByUserLoginOrderByEndDateDesc(SecurityUtils.getCurrentLogin()).
+        return challengeRepository.findByUserLoginOrderByStartDateDesc(SecurityUtils.getCurrentLogin()).
             stream().map(this::progress).collect(Collectors.toList());
     }
 

@@ -7,7 +7,7 @@
 
         <div class="form-group">
             <label for="period">Period</label>
-            <select class="form-control" id="period">
+            <select class="form-control" id="period" ng-model="challenge.period">
                 <option value="THREE_DAYS">3 Days</option>
                 <option value="ONE_WEEK">1 Week</option>
                 <option value="TWO_WEEKS">2 Weeks</option>
@@ -16,11 +16,7 @@
         </div>
 
         <div class="form-group">
-            <label for="end-date">End date</label>
-            <input type="date" class="form-control" id="end-date" ng-model="challenge.endDate"/>
-        </div>
-        <div class="form-group">
-            <label for="end-date">Amount</label>
+            <label for="amount">Amount</label>
             <input type="number" class="form-control" id="amount" ng-model="challenge.amount"/>
         </div>
 
