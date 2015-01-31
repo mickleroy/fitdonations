@@ -10,7 +10,7 @@ spring:
         url: 
         databaseName: fitdonations
         serverName: localhost
-        username: fitdonations
+        username: postgres
         password: 
 
     jpa:
