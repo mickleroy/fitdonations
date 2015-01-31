@@ -28,6 +28,10 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(length = 50, unique = true, nullable = false)
     private String login;
 
+    @NotNull
+    @Column(nullable = false, updatable = false)
+    private String uuid;
+
     @JsonIgnore
     @NotNull
     @Size(min = 6, max = 100)
@@ -192,5 +196,13 @@ public class User extends AbstractAuditingEntity implements Serializable {
                 ", langKey='" + langKey + '\'' +
                 ", activationKey='" + activationKey + '\'' +
                 "}";
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -36,11 +36,20 @@ public class UserDTO {
     private String langKey;
 
     private List<String> roles;
+
+    private String paymentMethodNonce;
     
     @Nullable
     private DeviceDTO device;
 
     public UserDTO() {
+    }
+
+    public UserDTO(Long id, String login, String password, String firstName, String lastName, String email, String langKey,
+                   Device device, List<String> roles, String paymentMethodNonce) {
+        this(id, login, password, firstName, lastName, email, langKey, device, roles);
+
+        this.paymentMethodNonce = paymentMethodNonce;
     }
 
     public UserDTO(Long id, String login, String password, String firstName, String lastName, String email, String langKey,
@@ -101,7 +110,16 @@ public class UserDTO {
         ", lastName='" + lastName + '\'' +
         ", email='" + email + '\'' +
         ", langKey='" + langKey + '\'' +
-        ", roles=" + roles +
+        ", roles=" + roles + '\'' +
+        ", paymentMethodNonce=" + paymentMethodNonce +
         '}';
+    }
+
+    public String getPaymentMethodNonce() {
+        return paymentMethodNonce;
+    }
+
+    public void setPaymentMethodNonce(String paymentMethodNonce) {
+        this.paymentMethodNonce = paymentMethodNonce;
     }
 }

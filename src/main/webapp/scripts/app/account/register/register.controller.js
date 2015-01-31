@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('fitdonationsApp')
-    .controller('RegisterController', function ($scope, $translate, $timeout, Auth) {
+    .controller('RegisterController', function ($scope, $translate, $timeout, Auth, Principal) {
         $scope.success = null;
         $scope.error = null;
         $scope.doNotMatch = null;
@@ -33,4 +33,21 @@ angular.module('fitdonationsApp')
                 });
             }
         };
+
+        /* Initializers */
+        // get client token
+        Principal.clientToken().then(function(token) {
+            braintree.setup(
+                token,
+                'dropin', {
+                    container: "registrationForm",
+                    paymentMethodNonceReceived: function (event, nonce) {
+                        console.log($scope);
+                        console.log($scope.registerAccount);
+                        console.log($scope.register);
+                        $scope.registerAccount.paymentMethodNonce = nonce;
+                        $scope.register();
+                    }
+                });
+        });
     });
