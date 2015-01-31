@@ -101,6 +101,7 @@ public class ChallengeResource {
         progress.setDaysLeft( (int) ( (c.getEndDate().getMillis() - new Date().getTime()) / (24 * 60 * 60 * 1000)));
         progress.setDistanceLeft(c.getProgress() == null ? c.getDistance() : c.getDistance() - c.getProgress());
         progress.setAmount(c.getAmount());
+        progress.setEndTime(c.getEndDate().getMillis());
         return progress;
     }
 
