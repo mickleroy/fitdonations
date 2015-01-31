@@ -65,6 +65,7 @@ public class ChallengeResource {
         challenge.setCharity(charityRepository.findOne(challengeDTO.getCharityId()));
         challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
         challenge.setFinished(false);
+        challenge.setPayed(false);
         challengeRepository.save(challenge);
         log.info("Save challenge [" + challenge + "]");
     }
