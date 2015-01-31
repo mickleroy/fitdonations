@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('fitdonationsApp')
-    .controller('NewChallengeController', function ($scope, Charity, Challenge) {
+    .controller('NewChallengeController', function ($scope, Charity, Challenge, $state) {
         $scope.startChallenge = function() {
             Challenge.newChallenge($scope.challenge, function() {
-                window.alert('SUCCESS');
+                $state.go('home');
             });
             return false;
         };
