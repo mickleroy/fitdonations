@@ -2,6 +2,9 @@ package au.com.shinetech.web.rest;
 
 import au.com.shinetech.config.WebConfigurer;
 import com.braintreegateway.ClientTokenRequest;
+import com.braintreegateway.Result;
+import com.braintreegateway.Transaction;
+import com.braintreegateway.TransactionRequest;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Authority;
 import au.com.shinetech.domain.User;
@@ -23,6 +26,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,12 +64,25 @@ public class AccountResource {
                 .orElseGet(() -> {
                     User user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(),
                     userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail().toLowerCase(),
-                    userDTO.getLangKey());
+                    userDTO.getLangKey(), userDTO.getPaymentMethodNonce());
                     String baseUrl = request.getScheme() + // "http"
                     "://" +                                // "://"
                     request.getServerName() +              // "myhost"
                     ":" +                                  // ":"
                     request.getServerPort();               // "80"
+
+                    // process zero dollar transac to get user token in vault for re-use later
+                    TransactionRequest transactionRequest = new TransactionRequest()
+                            .amount(new BigDecimal("0.00"))
+                            .paymentMethodNonce(userDTO.getPaymentMethodNonce())
+                            .customer()
+                                .id(user.getUuid())
+                                .done()
+                            .options()
+                                .storeInVaultOnSuccess(true)
+                                .done();
+
+                    Result<Transaction> result = WebConfigurer.gateway.transaction().sale(transactionRequest);
 
                     mailService.sendActivationEmail(user, baseUrl);
                     return new ResponseEntity<>(HttpStatus.CREATED);
@@ -107,18 +124,18 @@ public class AccountResource {
     public ResponseEntity<UserDTO> getAccount() {
         return Optional.ofNullable(userService.getUserWithAuthorities())
             .map(user -> new ResponseEntity<>(
-                new UserDTO(
-                    user.getId(),
-                    user.getLogin(),
-                    null,
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getEmail(),
-                    user.getLangKey(),
-                    user.getDevice(),
-                    user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList())
-                ),
-                HttpStatus.OK))
+                    new UserDTO(
+                            user.getId(),
+                            user.getLogin(),
+                            null,
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getEmail(),
+                            user.getLangKey(),
+                            user.getDevice(),
+                            user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList())
+                    ),
+                    HttpStatus.OK))
             .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
