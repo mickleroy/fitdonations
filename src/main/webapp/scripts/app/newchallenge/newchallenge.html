@@ -7,7 +7,7 @@
         </div>
         <small>This is the distance (in meters) that you will attempt to run during your challenge.</small>
         <br/><br/>
-        
+
         <label for="period">Period</label>
         <div class="input-group">
             <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
@@ -20,7 +20,7 @@
         </div>
         <small>This is the duration of your challenge.</small>
         <br/><br/>
-        
+
         <label>Amount</label>
         <div class="input-group">
             <span class="input-group-addon">$</span>
@@ -29,10 +29,16 @@
         <small>This is the amount you pledge to donate if you fail to complete your fitness goal.</small>
 
         <div ng-repeat="c in charitys" class="radio">
-            <label>
-                <input type="radio" name="charities" ng-model="challenge.charityId" value="{{c.id}}">
-                {{c.name}}
-            </label>
+            <div ng-show="c.image">
+                <label>
+                    <input type="radio" name="charities" ng-model="$parent.challenge.charityId" value="{{c.id}}">
+                    {{c.name}}
+                </label>
+                <br/>
+                <img src="{{c.image}}"/> <br/>
+                <a href="{{c.website}}">Read More...</a>
+
+            </div>
         </div>
         <button class="btn btn-danger pull-right" ng-click="startChallenge()">Let's go</button>
     </form>

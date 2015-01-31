@@ -21,6 +21,12 @@ public class Charity implements Serializable {
     @Column(name = "name")
     private String name;
 
+    private String email;
+
+    private String image;
+
+    private String website;
+
     @OneToMany(mappedBy = "charity")
     @JsonIgnore
     private Set<Challenge> challenges = new HashSet<>();
@@ -63,6 +69,30 @@ public class Charity implements Serializable {
         if (id != null ? !id.equals(charity.id) : charity.id != null) return false;
 
         return true;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 
     @Override
