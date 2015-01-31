@@ -49,6 +49,17 @@
             <a class="btn btn-success btn-lg" ui-sref="newdonation">Donate!</a>
         </div>
         <h1>Your current progress:</h1>
-        <!--TODO:-->
+        <div ng-repeat="p in progress">
+            <h2 style="color: red">{{p.daysLeft}} days left.</h2>
+            <div class="progress">
+                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
+                     style="width: {{p.percentsDone}}%">
+                    <span class="sr-only">{{p.percentsDone}}% Complete (success)</span>
+                    {{p.percentsDone}}%
+                </div>
+
+                Run {{p.distanceLeft}} meters more or pay {{p.amount}}$
+            </div>
+        </div>
     </div>
 </div>
