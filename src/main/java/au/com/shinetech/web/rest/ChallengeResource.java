@@ -71,15 +71,6 @@ public class ChallengeResource {
         log.info("Save challenge [" + challenge + "]");
     }
 
-    private void makePayment(BigDecimal amount, User user) {
-        TransactionRequest request = new TransactionRequest()
-                .customerId(user.getUuid())
-                .amount(amount);
-
-        Result<Transaction> result = WebConfigurer.gateway.transaction().sale(request);
-    }
-
-
     private Date getEndDate(ChallengeDTO challengeDTO) {
         int addDays = 0;
         switch (challengeDTO.getPeriod()) {
