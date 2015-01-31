@@ -1,20 +1,15 @@
 package au.com.shinetech.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import au.com.shinetech.domain.util.CustomDateTimeDeserializer;
 import au.com.shinetech.domain.util.CustomDateTimeSerializer;
 import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A Challenge.
@@ -48,9 +43,11 @@ public class Challenge implements Serializable {
     @Column(name = "end_date", nullable = false)
     private DateTime endDate;
 
+    /* indicates whether this challenge has been processed */
     @Column(name="finished")
     private boolean finished;
 
+    /* indicates whether the payment was made to the charity */
     @Column(name="payed")
     private boolean payed;
 
