@@ -6,6 +6,9 @@
             "home": "Accueil",
             "entities": {
                 "main": "Entités",
+                "charity": "Charity",
+                "challenge": "Challenge",
+                "device": "Device",
                 "additionalEntity": "JHipster will add addtional entities"
             },
             "account": {

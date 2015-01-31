@@ -499,8 +499,8 @@
                     <driver>org.postgresql.Driver</driver>
                     <url>jdbc:postgresql://localhost/fitdonations</url>
                     <defaultSchemaName></defaultSchemaName>
-                    <username>fitdonations</username>
-                    <password></password>
+                    <username>postgres</username>
+                    <password>postgres</password>
                     <referenceUrl>hibernate:spring:au.com.shinetech.domain?dialect=org.hibernate.dialect.PostgreSQL82Dialect</referenceUrl>
                     <verbose>true</verbose>
                     <logging>debug</logging>

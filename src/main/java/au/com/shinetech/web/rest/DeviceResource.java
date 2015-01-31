@@ -1,11 +1,12 @@
 
 package au.com.shinetech.web.rest;
 
+import au.com.shinetech.domain.Device;
+import au.com.shinetech.repository.DeviceRepository;
 import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.service.MailService;
 import au.com.shinetech.service.UserService;
 import com.codahale.metrics.annotation.Timed;
-import java.util.HashMap;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,31 +17,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import com.google.api.client.auth.oauth.OAuthAuthorizeTemporaryTokenUrl;
 import com.google.api.client.auth.oauth.OAuthCallbackUrl;
 import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
 import com.google.api.client.auth.oauth.OAuthGetAccessToken;
 import com.google.api.client.auth.oauth.OAuthGetTemporaryToken;
 import com.google.api.client.auth.oauth.OAuthHmacSigner;
-import com.google.api.client.auth.oauth.OAuthParameters;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- *
- * @author michael
- */
+
 @RestController
 @RequestMapping("/api")
 public class DeviceResource {
@@ -56,6 +50,9 @@ public class DeviceResource {
     @Inject
     private MailService mailService;
     
+    @Inject
+    private DeviceRepository deviceRepository;
+    
     private static final String CLIENT_CONSUMER_KEY = "2f4ac84d9282434084fff5c23b2aeb92";
     private static final String CLIENT_SECRET = "6564439417104201a920b4dd3bf0cd83";
     
@@ -66,6 +63,58 @@ public class DeviceResource {
     private static final String FITBIT_REQUEST_TOKEN = "/oauth/request_token";
     private static final String FITBIT_AUTHORIZE = "/oauth/authorize";
     private static final String FITBIT_ACCESS_TOKEN = "/oauth/access_token";
+    
+    /**
+     * POST  /devices -> Create a new device.
+     */
+    @RequestMapping(value = "/devices",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public void create(@RequestBody Device device) {
+        log.debug("REST request to save Device : {}", device);
+        deviceRepository.save(device);
+    }
+
+    /**
+     * GET  /devices -> get all the devices.
+     */
+    @RequestMapping(value = "/devices",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public List<Device> getAll() {
+        log.debug("REST request to get all Devices");
+        return deviceRepository.findAll();
+    }
+
+    /**
+     * GET  /devices/:id -> get the "id" device.
+     */
+    @RequestMapping(value = "/devices/{id}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<Device> get(@PathVariable Long id) {
+        log.debug("REST request to get Device : {}", id);
+        return Optional.ofNullable(deviceRepository.findOne(id))
+            .map(device -> new ResponseEntity<>(
+                device,
+                HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    /**
+     * DELETE  /devices/:id -> delete the "id" device.
+     */
+    @RequestMapping(value = "/devices/{id}",
+            method = RequestMethod.DELETE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public void delete(@PathVariable Long id) {
+        log.debug("REST request to delete Device : {}", id);
+        deviceRepository.delete(id);
+    }
     
     /**
      * GET  /device/link -> initiates the linking of a device to a user.
@@ -140,5 +189,6 @@ public class DeviceResource {
         
         
         return new ResponseEntity<>("Authorisation complete!", HttpStatus.OK);
+
     }
 }

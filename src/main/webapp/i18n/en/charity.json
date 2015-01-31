@@ -1,0 +1,19 @@
+{
+    "fitdonationsApp": {
+        "charity" : {
+            "home": {
+                "title": "Charitys",
+                "createLabel": "Create a new Charity",
+                "createOrEditLabel": "Create or edit a Charity"
+            },
+            "delete": {
+                "question": "Are you sure you want to delete Charity {{ id }}?"
+            },
+            "detail": {
+                "title": "Charity"
+            },
+            "name": "Name",
+            "challenge": "challenge"
+        }
+    }
+}

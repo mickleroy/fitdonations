@@ -1,0 +1,23 @@
+{
+    "fitdonationsApp": {
+        "challenge" : {
+            "home": {
+                "title": "Challenges",
+                "createLabel": "Create a new Challenge",
+                "createOrEditLabel": "Create or edit a Challenge"
+            },
+            "delete": {
+                "question": "Are you sure you want to delete Challenge {{ id }}?"
+            },
+            "detail": {
+                "title": "Challenge"
+            },
+            "amount": "Amount",
+            "distance": "Distance",
+            "startDate": "StartDate",
+            "endDate": "EndDate",
+            "user": "user",
+            "charity": "charity"
+        }
+    }
+}
