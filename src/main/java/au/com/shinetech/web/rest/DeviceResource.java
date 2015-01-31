@@ -2,6 +2,7 @@
 package au.com.shinetech.web.rest;
 
 import au.com.shinetech.domain.Device;
+import au.com.shinetech.domain.User;
 import au.com.shinetech.repository.DeviceRepository;
 import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.service.MailService;
@@ -31,8 +32,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -118,12 +121,16 @@ public class DeviceResource {
     
     /**
      * GET  /device/link -> initiates the linking of a device to a user.
+     * @param userId
+     * @param builder
+     * @return 
      */
     @RequestMapping(value = "/device/link",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<?> linkDevice(UriComponentsBuilder builder) {
+    public ResponseEntity<?> linkDevice(@RequestParam String userId, 
+                                        UriComponentsBuilder builder) {
         try {
             // retrieve temporary token from fitbit
             HttpTransport transport = new ApacheHttpTransport();
@@ -134,11 +141,20 @@ public class DeviceResource {
             tempTokenRequest.consumerKey = CLIENT_CONSUMER_KEY;
             tempTokenRequest.transport = transport;
             tempTokenRequest.signer = signer;
-            tempTokenRequest.callback = WEBAPP_URL + "/api/device/authorize";
+            tempTokenRequest.callback = WEBAPP_URL + "/api/device/authorize?userId="+userId;
             OAuthCredentialsResponse credResponse = tempTokenRequest.execute();
 
-            // store secret token in session for HMAC-SHA1 signing
-//            request.getSession(true).setAttribute("SECRET_TOKEN", credResponse.tokenSecret);
+            // store secret token in database for HMAC-SHA1 signing
+            User user = userRepository.findOne(Long.valueOf(userId));
+            if(user.getDevice() == null) {
+                Device newDevice = new Device();
+                newDevice.setSecretToken(credResponse.tokenSecret);
+                newDevice = deviceRepository.save(newDevice);
+                user.setDevice(newDevice);
+            } else {
+                user.getDevice().setSecretToken(credResponse.tokenSecret);
+            }
+            userRepository.save(user);
 
             // redirect user to fitbit for authorization
             OAuthAuthorizeTemporaryTokenUrl authTempTokenRequest = new OAuthAuthorizeTemporaryTokenUrl(FITBIT_BASE_URL+FITBIT_AUTHORIZE);
@@ -160,35 +176,40 @@ public class DeviceResource {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
-    public ResponseEntity<?> postAuthorisation() {
-        // parse callback url
-//        String callbackUrl = request.getRequestURL().toString()+"?"+request.getQueryString();
-        OAuthCallbackUrl callbackParser = new OAuthCallbackUrl(callbackUrl);
+    public ResponseEntity<?> postAuthorisation(@RequestParam String userId, 
+                                                HttpServletRequest request) {
+        try {
+            // parse callback url
+            String callbackUrl = request.getRequestURL().toString()+"?"+request.getQueryString();
+            OAuthCallbackUrl callbackParser = new OAuthCallbackUrl(callbackUrl);
 
-        // exchange temporary token for access token
-        HttpTransport transport = new ApacheHttpTransport();
-        OAuthHmacSigner signer = new OAuthHmacSigner();
-        signer.clientSharedSecret = CLIENT_SECRET;
-//        signer.tokenSharedSecret = (String)request.getSession(true).getAttribute("SECRET_TOKEN");
+            // retrieve user
+            User user = userRepository.findOne(Long.valueOf(userId));
 
-        OAuthGetAccessToken accessTokenRequest = new OAuthGetAccessToken(FITBIT_API_URL+FITBIT_ACCESS_TOKEN);
-        accessTokenRequest.consumerKey = CLIENT_CONSUMER_KEY;
-        accessTokenRequest.transport = transport;
-        accessTokenRequest.signer = signer;
-        accessTokenRequest.temporaryToken = callbackParser.token;
-        accessTokenRequest.verifier = callbackParser.verifier;                
-        OAuthCredentialsResponse credResponse = accessTokenRequest.execute();
+            // exchange temporary token for access token
+            HttpTransport transport = new ApacheHttpTransport();
+            OAuthHmacSigner signer = new OAuthHmacSigner();
+            signer.clientSharedSecret = CLIENT_SECRET;
+            signer.tokenSharedSecret = user.getDevice().getSecretToken();
 
-        System.out.println("ACCESS TOKEN: " + credResponse.token);
+            OAuthGetAccessToken accessTokenRequest = new OAuthGetAccessToken(FITBIT_API_URL+FITBIT_ACCESS_TOKEN);
+            accessTokenRequest.consumerKey = CLIENT_CONSUMER_KEY;
+            accessTokenRequest.transport = transport;
+            accessTokenRequest.signer = signer;
+            accessTokenRequest.temporaryToken = callbackParser.token;
+            accessTokenRequest.verifier = callbackParser.verifier;                
+            OAuthCredentialsResponse credResponse = accessTokenRequest.execute();
 
-        // store access token and new secret in session
-//        request.getSession(true).setAttribute("ACCESS_TOKEN", credResponse.token);
-//        request.getSession(true).setAttribute("SECRET_TOKEN", credResponse.tokenSecret);
-
-        return "redirect:"+returnPath;
-        
-        
-        return new ResponseEntity<>("Authorisation complete!", HttpStatus.OK);
-
+            // store access token and new secret in session
+            user.getDevice().setAccessToken(credResponse.token);
+            user.getDevice().setSecretToken(credResponse.tokenSecret);
+            
+            return new ResponseEntity<>("Authorisation complete!", HttpStatus.OK);
+        } catch(IOException ex) {
+            log.error("Could not execute request", ex);
+        } catch (NumberFormatException numEx) {
+            log.error("Invalid user id specified", numEx);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
