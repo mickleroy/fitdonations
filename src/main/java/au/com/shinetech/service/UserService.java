@@ -55,7 +55,7 @@ public class UserService {
     }
 
     public User createUserInformation(String login, String password, String firstName, String lastName, String email,
-                                      String langKey, String nounce) {
+                                      String langKey, String transactionId) {
         User newUser = new User();
         Authority authority = authorityRepository.findOne("ROLE_USER");
         Set<Authority> authorities = new HashSet<>();
@@ -73,7 +73,7 @@ public class UserService {
         newUser.setActivationKey(RandomUtil.generateActivationKey());
         authorities.add(authority);
         newUser.setAuthorities(authorities);
-        newUser.setUuid(Base64Utils.encodeToString(nounce.getBytes()));
+        newUser.setUuid(transactionId);
         userRepository.save(newUser);
         log.debug("Created Information for User: {}", newUser);
         return newUser;

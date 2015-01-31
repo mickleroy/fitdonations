@@ -66,21 +66,20 @@ public class ChallengeResource {
         challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
         challenge.setFinished(false);
         challengeRepository.save(challenge);
+
+        makePayment(challenge.getAmount(), challenge.getUser());
+
         log.info("Save challenge [" + challenge + "]");
     }
 
-    @RequestMapping(value = "/challenges/donate", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public void donate(@RequestParam(value="payment_method_nonce") String paymentMethodNonce) {
-
-
+    private void makePayment(BigDecimal amount, User user) {
         TransactionRequest request = new TransactionRequest()
-                .amount(new BigDecimal("10.00"))
-                .paymentMethodNonce(paymentMethodNonce)
-                .customerId("customerLogin");
+                .customerId(user.getUuid())
+                .amount(amount);
 
         Result<Transaction> result = WebConfigurer.gateway.transaction().sale(request);
-
     }
+
 
     private Date getEndDate(ChallengeDTO challengeDTO) {
         int addDays = 0;

@@ -42,9 +42,6 @@ angular.module('fitdonationsApp')
                 'dropin', {
                     container: "registrationForm",
                     paymentMethodNonceReceived: function (event, nonce) {
-                        console.log($scope);
-                        console.log($scope.registerAccount);
-                        console.log($scope.register);
                         $scope.registerAccount.paymentMethodNonce = nonce;
                         $scope.register();
                     }
