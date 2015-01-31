@@ -7,6 +7,7 @@ angular.module('fitdonationsApp')
             $scope.isAuthenticated = Principal.isAuthenticated;
 
             if ($scope.isAuthenticated) {
+                $scope.inProgress = true;
                 Challenge.progress(function(data) {
                     $scope.progress = data;
                     $scope.currentChallenge = data.length;
@@ -41,6 +42,7 @@ angular.module('fitdonationsApp')
                             //Chart.defaults.global.responsive = true;
                         }, 500);
                     }
+                    $scope.inProgress = false;
                 });
 
                 Challenge.finished(function(data) {
