@@ -1,5 +1,5 @@
 <div ng-cloak>
-    <div class="row">
+    <!--div class="row">
         <div class="col-md-4">
             <span class="hipster img-responsive img-rounded"></span>
         </div>
@@ -38,5 +38,19 @@
              <span translate="main.like">If you like JHipster, don't forget to give us a star on </span>&nbsp;<a href="https://github.com/jhipster/generator-jhipster" target="_blank" translate="main.github">Github</a>!
             </p>
         </div>
+    </div-->
+    <div class="jumbotron" ng-if="!isAuthenticated()">
+        <h1>Run or Pay!</h1>
+        <p>Setup your goal and hit it. Otherwise, donate to your favorite charity. Be happy in both cases!</p>
+        <p><a class="btn btn-success btn-lg" ui-sref="register">Create Account</a></p>
+    </div>
+
+    <div ng-if="isAuthenticated()">
+        <div class="row">
+            <a class="btn btn-success btn-lg" ui-sref="newchallenge">Start new challenge!</a>
+            <a class="btn btn-success btn-lg" ui-sref="linkfitbit">Link Fitbit</a>
+        </div>
+        <h1>Your current progress:</h1>
+        <!--TODO:-->
     </div>
 </div>
