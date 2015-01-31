@@ -1,0 +1,13 @@
+[
+    { "ParameterKey": "SSLCertificateId",  "ParameterValue": "arn:aws:iam::291494934456:server-certificate/battlehack" },
+    { "ParameterKey": "AvailabilityZone",  "ParameterValue": "a" },
+    { "ParameterKey": "RegionName",        "ParameterValue": "ap-southeast-2" },
+    { "ParameterKey": "AppName",           "ParameterValue": "fitdonate" },
+    { "ParameterKey": "TagPrefix",         "ParameterValue": "battlehack" },
+    { "ParameterKey": "FileBucket",        "ParameterValue": "battlehack" },
+    { "ParameterKey": "AMI",               "ParameterValue": "ami-abeb9e91" },
+    { "ParameterKey": "AlertsEmail",       "ParameterValue": "shane.neubauer@shinetech.com" },
+    { "ParameterKey": "KeyPair",           "ParameterValue": "battlehack" },
+    { "ParameterKey": "DbUsername",        "ParameterValue": "master" },
+    { "ParameterKey": "DbPassword",        "ParameterValue": "s4apfes4apfe" }
+]

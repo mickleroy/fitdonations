@@ -25,6 +25,11 @@ import com.google.api.client.auth.oauth.OAuthCredentialsResponse;
 import com.google.api.client.auth.oauth.OAuthGetAccessToken;
 import com.google.api.client.auth.oauth.OAuthGetTemporaryToken;
 import com.google.api.client.auth.oauth.OAuthHmacSigner;
+import com.google.api.client.auth.oauth.OAuthParameters;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.apache.ApacheHttpTransport;
 import java.io.IOException;
@@ -33,6 +38,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -146,14 +153,16 @@ public class DeviceResource {
 
             // store secret token in database for HMAC-SHA1 signing
             User user = userRepository.findOne(Long.valueOf(userId));
+            Device device = null;
             if(user.getDevice() == null) {
-                Device newDevice = new Device();
-                newDevice.setSecretToken(credResponse.tokenSecret);
-                newDevice = deviceRepository.save(newDevice);
-                user.setDevice(newDevice);
+                device = new Device();
+                device.setSecretToken(credResponse.tokenSecret);
+                user.setDevice(device);
             } else {
+                device = user.getDevice();
                 user.getDevice().setSecretToken(credResponse.tokenSecret);
             }
+            deviceRepository.save(device);
             userRepository.save(user);
 
             // redirect user to fitbit for authorization
@@ -203,12 +212,47 @@ public class DeviceResource {
             // store access token and new secret in session
             user.getDevice().setAccessToken(credResponse.token);
             user.getDevice().setSecretToken(credResponse.tokenSecret);
+            deviceRepository.save(user.getDevice());
             
             return new ResponseEntity<>("Authorisation complete!", HttpStatus.OK);
         } catch(IOException ex) {
             log.error("Could not execute request", ex);
         } catch (NumberFormatException numEx) {
             log.error("Invalid user id specified", numEx);
+        }
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @RequestMapping(value = "/device/activities/{date}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<?> getActivities(@RequestParam String userId, 
+                                          @PathVariable String date,
+                                          HttpServletRequest request) {
+        try {
+            // get the user
+            User user = userRepository.findOne(Long.valueOf(userId));
+            
+            // build request to retrieve activities from fitbit
+            OAuthHmacSigner signer = new OAuthHmacSigner();
+            signer.clientSharedSecret = CLIENT_SECRET;
+            signer.tokenSharedSecret = user.getDevice().getSecretToken();
+
+            OAuthParameters params = new OAuthParameters();
+            params.signer = signer;
+            params.consumerKey = CLIENT_CONSUMER_KEY;
+            params.token = user.getDevice().getAccessToken();
+
+            HttpRequestFactory factory = new ApacheHttpTransport().createRequestFactory(params);
+            HttpRequest httpReq = factory.buildGetRequest(
+                    new GenericUrl(FITBIT_API_URL+"/1/user/-/activities/date/"+date+".json"));
+            HttpResponse response = httpReq.execute();
+            String jsonResponse = IOUtils.toString(response.getContent());
+
+            return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        } catch(IOException ex) {
+            log.error("Could not retrieve device information");
         }
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
