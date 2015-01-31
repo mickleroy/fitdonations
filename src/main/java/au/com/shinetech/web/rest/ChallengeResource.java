@@ -1,16 +1,24 @@
 package au.com.shinetech.web.rest;
 
+import au.com.shinetech.domain.User;
+import au.com.shinetech.repository.CharityRepository;
+import au.com.shinetech.repository.UserRepository;
+import au.com.shinetech.security.SecurityUtils;
+import au.com.shinetech.web.rest.dto.ChallengeDTO;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +33,10 @@ public class ChallengeResource {
 
     @Inject
     private ChallengeRepository challengeRepository;
+    @Inject
+    private CharityRepository charityRepository;
+    @Inject
+    private UserRepository userRepository;
 
     /**
      * POST  /challenges -> Create a new challenge.
@@ -36,6 +48,19 @@ public class ChallengeResource {
     public void create(@RequestBody Challenge challenge) {
         log.debug("REST request to save Challenge : {}", challenge);
         challengeRepository.save(challenge);
+    }
+
+    @RequestMapping(value = "/challenges/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public void startChallenge(@RequestBody ChallengeDTO challengeDTO) {
+        Challenge challenge = new Challenge();
+        challenge.setAmount(new BigDecimal(challengeDTO.getAmount()));
+        challenge.setDistance(challengeDTO.getDistance());
+        challenge.setStartDate(DateTime.now());
+        challenge.setEndDate(new DateTime(challengeDTO.getEndDate()));
+        challenge.setCharity(charityRepository.findOne(challengeDTO.getCharityId()));
+        challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
+        challengeRepository.save(challenge);
+        log.info("Save challenge [" + challenge + "]");
     }
 
     /**

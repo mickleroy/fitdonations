@@ -1,5 +1,6 @@
 package au.com.shinetech.web.rest.dto;
 
+import au.com.shinetech.domain.Device;
 import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.NotNull;
@@ -32,12 +33,14 @@ public class UserDTO {
     private String langKey;
 
     private List<String> roles;
+    
+    private DeviceDTO device;
 
     public UserDTO() {
     }
 
     public UserDTO(String login, String password, String firstName, String lastName, String email, String langKey,
-                   List<String> roles) {
+                   Device device, List<String> roles) {
         this.login = login;
         this.password = password;
         this.firstName = firstName;
@@ -45,6 +48,7 @@ public class UserDTO {
         this.email = email;
         this.langKey = langKey;
         this.roles = roles;
+        this.device = device != null ? new DeviceDTO(device) : null;
     }
 
     public String getPassword() {
@@ -73,6 +77,10 @@ public class UserDTO {
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    public DeviceDTO getDevice() {
+        return device;
     }
 
     @Override

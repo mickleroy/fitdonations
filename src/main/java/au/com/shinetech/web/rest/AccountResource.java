@@ -7,6 +7,7 @@ import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.security.SecurityUtils;
 import au.com.shinetech.service.MailService;
 import au.com.shinetech.service.UserService;
+import au.com.shinetech.web.rest.dto.DeviceDTO;
 import au.com.shinetech.web.rest.dto.UserDTO;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -111,7 +112,9 @@ public class AccountResource {
                     user.getLastName(),
                     user.getEmail(),
                     user.getLangKey(),
-                    user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList())),
+                    user.getDevice(),
+                    user.getAuthorities().stream().map(Authority::getName).collect(Collectors.toList())
+                ),
                 HttpStatus.OK))
             .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
     }
