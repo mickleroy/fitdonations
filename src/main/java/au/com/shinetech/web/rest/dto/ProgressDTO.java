@@ -9,6 +9,7 @@ public class ProgressDTO {
     private int distanceTotal;
     private BigDecimal amount;
     private int distanceLeft;
+    private long endTime;
 
     public int getDaysLeft() {
         return daysLeft;
@@ -56,5 +57,13 @@ public class ProgressDTO {
 
     public void setDistanceLeft(int distanceLeft) {
         this.distanceLeft = distanceLeft;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
     }
 }
