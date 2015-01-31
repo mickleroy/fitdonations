@@ -1,22 +1,35 @@
-<form>
-    <div class="form-group">
-        <label for="distance">Distance</label>
-        <input type="number" class="form-control" id="distance" ng-model="challenge.distance"/>
-    </div>
-    <div class="form-group">
-        <label for="end-date">End date</label>
-        <input type="date" class="form-control" id="end-date" ng-model="challenge.endDate"/>
-    </div>
-    <div class="form-group">
-        <label for="end-date">Amount</label>
-        <input type="number" class="form-control" id="amount" ng-model="challenge.amount"/>
-    </div>
+<div class="container" style="margin-top: 50px; margin-bottom: 50px">
+    <form>
+        <div class="form-group">
+            <label for="distance">Distance</label>
+            <input type="number" class="form-control" id="distance" ng-model="challenge.distance"/>
+        </div>
 
-    <div ng-repeat="c in charitys" class="radio">
-        <label>
-            <input type="radio" name="charities" ng-model="challenge.charityId" value="{{c.id}}">
-            {{c.name}}
-        </label>
-    </div>
-    <button class="btn btn-default" ng-click="startChallenge()">Start</button>
-</form>
+        <div class="form-group">
+            <label for="period">Period</label>
+            <select class="form-control" id="period">
+                <option value="THREE_DAYS">3 Days</option>
+                <option value="ONE_WEEK">1 Week</option>
+                <option value="TWO_WEEKS">2 Weeks</option>
+                <option value="ONE_MONTH">1 Month</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="end-date">End date</label>
+            <input type="date" class="form-control" id="end-date" ng-model="challenge.endDate"/>
+        </div>
+        <div class="form-group">
+            <label for="end-date">Amount</label>
+            <input type="number" class="form-control" id="amount" ng-model="challenge.amount"/>
+        </div>
+
+        <div ng-repeat="c in charitys" class="radio">
+            <label>
+                <input type="radio" name="charities" ng-model="challenge.charityId" value="{{c.id}}">
+                {{c.name}}
+            </label>
+        </div>
+        <button class="btn btn-danger pull-right" ng-click="startChallenge()">Let's go</button>
+    </form>
+</div>

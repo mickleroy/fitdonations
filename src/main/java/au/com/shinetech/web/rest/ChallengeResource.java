@@ -60,11 +60,31 @@ public class ChallengeResource {
         challenge.setAmount(new BigDecimal(challengeDTO.getAmount()));
         challenge.setDistance(challengeDTO.getDistance());
         challenge.setStartDate(DateTime.now());
-        challenge.setEndDate(new DateTime(challengeDTO.getEndDate()));
+        //challenge.setEndDate(new DateTime(challengeDTO.getEndDate()));
+        challenge.setEndDate(new DateTime(getEndDate(challengeDTO)));
         challenge.setCharity(charityRepository.findOne(challengeDTO.getCharityId()));
         challenge.setUser(userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get());
         challengeRepository.save(challenge);
         log.info("Save challenge [" + challenge + "]");
+    }
+
+    private Date getEndDate(ChallengeDTO challengeDTO) {
+        int addDays = 0;
+        switch (challengeDTO.getPeriod()) {
+            case THREE_DAYS:
+                addDays = 3;
+                break;
+            case ONE_WEEK:
+                addDays = 7;
+                break;
+            case TWO_WEEKS:
+                addDays = 14;
+                break;
+            case ONE_MONTH:
+                addDays = 31;
+                break;
+        }
+        return DateUtils.addDays(new Date(), addDays);
     }
 
     @RequestMapping(value = "/challenges/progress", method = RequestMethod.GET)
