@@ -81,7 +81,7 @@
 
                 <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary" translate="settings.form.button">Save</button>
             </form>
-            
+
             <h3>Devices</h3>
             <div class="alert alert-info" role="alert" ng-if="settingsAccount.device === null">
                 You do not have any devices linked to your account! <a class="pull-right" ng-click="linkDevice()">Link device now</a>
@@ -97,7 +97,7 @@
                     <td>{{settingsAccount.device.dateAdded | date:'yyyy-MM-dd'}}</td>
                     <td>{{settingsAccount.device.description}}</td>
                     <td>{{settingsAccount.device.accessToken}}</td>
-                    <td><a href="#" ng-click="remove(settingsAccount.device.id)" class="btn btn-danger">Remove</a></td>
+                    <td><button ng-click="remove(settingsAccount.device.id)" class="btn btn-danger">Remove</button></td>
                 </tr>
             </table>
         </div>

@@ -1,10 +1,12 @@
 package au.com.shinetech.web.rest;
 
 import au.com.shinetech.config.WebConfigurer;
+import au.com.shinetech.domain.Activity;
 import au.com.shinetech.domain.User;
 import au.com.shinetech.repository.CharityRepository;
 import au.com.shinetech.repository.UserRepository;
 import au.com.shinetech.security.SecurityUtils;
+import au.com.shinetech.service.DeviceService;
 import au.com.shinetech.web.rest.dto.ChallengeDTO;
 import au.com.shinetech.web.rest.dto.ProgressDTO;
 import com.braintreegateway.*;
@@ -13,6 +15,9 @@ import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
 import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +47,8 @@ public class ChallengeResource {
     private CharityRepository charityRepository;
     @Inject
     private UserRepository userRepository;
+    @Inject
+    private DeviceService deviceService;
 
     /**
      * POST  /challenges -> Create a new challenge.
@@ -112,31 +120,38 @@ public class ChallengeResource {
 
     private ProgressDTO progress(Challenge c) {
         ProgressDTO progress = new ProgressDTO();
-        progress.setDistanceTotal(c.getDistance());
-        progress.setDistanceDone(c.getProgress() == null ? 0 : c.getProgress());
-        progress.setPercentsDone(c.getProgress() == null ? 0 : (int) ( ( (double) c.getProgress() / (double)c.getDistance()) * 100) );
-        progress.setDaysLeft( (int) ( (c.getEndDate().getMillis() - new Date().getTime()) / (24 * 60 * 60 * 1000)));
-        progress.setDistanceLeft(c.getProgress() == null ? c.getDistance() : c.getDistance() - c.getProgress());
-        progress.setAmount(c.getAmount());
-        progress.setEndTime(c.getEndDate().getMillis());
 
-        //TODO:
-        Map<String, Integer> metersByDays = new HashMap<>();
-        metersByDays.put("01/01", 2541);
-        metersByDays.put("02/01", 3541);
-        metersByDays.put("03/01", 5001);
-        metersByDays.put("04/01", 6541);
-        metersByDays.put("05/01", 8541);
-        metersByDays.put("06/01", 8941);
+        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get();
+        try {
+            JSONObject json = deviceService.getActivities(currentUser, Activity.Distance, c.getStartDate(), DateTime.now());
+            JSONArray array = json.getJSONArray("activities-distance");
+            int totalMeters = 0;
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject distance = array.getJSONObject(i);
+                String date = distance.getString("dateTime");
+                double kms = distance.getDouble("value");
+                int meters = (int) (kms * 1000);
+                totalMeters += meters;
+                progress.setMeterInDay(date, totalMeters);
+            }
+            if (totalMeters > c.getDistance()) {
+                c.setFinished(true);
+                challengeRepository.save(c);
+                return null;
+            }
 
-        progress.setMeterInDay("01/01", 2541);
-        progress.setMeterInDay("02/01", 3541);
-        progress.setMeterInDay("03/01", 5001);
-        progress.setMeterInDay("04/01", 6541);
-        progress.setMeterInDay("05/01", 8541);
-        progress.setMeterInDay("06/01", 8941);
-        progress.setMetersByDays(metersByDays);
+            progress.setDistanceTotal(c.getDistance());
+            progress.setDistanceDone(totalMeters);
+            progress.setPercentsDone((int) ( ( totalMeters / (double)c.getDistance()) * 100) );
+            progress.setDaysLeft( (int) ( (c.getEndDate().getMillis() - new Date().getTime()) / (24 * 60 * 60 * 1000)));
+            progress.setDistanceLeft(c.getDistance() - totalMeters);
+            progress.setAmount(c.getAmount());
+            progress.setEndTime(c.getEndDate().getMillis());
 
+            log.info("GOT IT");
+        } catch (Exception e) {
+            log.error("Error while requestion information from FitBit service", e);
+        }
         return progress;
     }
 

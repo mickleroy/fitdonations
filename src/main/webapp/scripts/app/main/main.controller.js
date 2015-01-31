@@ -34,9 +34,11 @@ angular.module('fitdonationsApp')
                                 chartData.labels.push(m.date);
                                 chartData.datasets[0].data.push(m.meters);
                             }
-
-                            new Chart(ctx).Line(chartData);
-                            Chart.defaults.global.responsive = true;
+                            new Chart(ctx).Bar(chartData, {
+                                scaleGridLineWidth: 1
+                            });
+                            //new Chart(ctx).Line(chartData);
+                            //Chart.defaults.global.responsive = true;
                         }, 500);
                     }
                 });

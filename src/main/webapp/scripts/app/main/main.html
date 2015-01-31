@@ -48,7 +48,6 @@
             <a class="btn btn-success btn-lg" ui-sref="newchallenge" ng-show="!currentChallenge">Start new challenge!</a>
         </div>
         <div ng-show="currentChallenge">
-            <h1>Your current progress:</h1>
             <div ng-repeat="p in progress">
                 <h2 style="color: red; text-align: center">
                     <timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>

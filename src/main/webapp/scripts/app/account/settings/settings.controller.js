@@ -20,11 +20,12 @@ angular.module('fitdonationsApp')
                 $scope.error = 'ERROR';
             });
         };
-        
+
         $scope.remove = function(deviceId) {
             Device.delete({id: deviceId});
-        }
-        
+            return false;
+        };
+
         $scope.linkDevice = function() {
             $window.location.href = '/api/device/link?userId=' + $scope.settingsAccount.id;
         }

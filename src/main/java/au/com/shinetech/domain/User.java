@@ -62,6 +62,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     @Column(name = "activation_key", length = 20)
     private String activationKey;
 
+    @JsonIgnore
     @OneToOne
     private Device device;
 
