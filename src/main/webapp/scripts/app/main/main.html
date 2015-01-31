@@ -47,35 +47,61 @@
         <div class="row">
             <a class="btn btn-success btn-lg" ui-sref="newchallenge" ng-show="!currentChallenge">Start new challenge!</a>
         </div>
-        <div ng-show="currentChallenge">
-            <div ng-repeat="p in progress">
-                <h2 style="color: red; text-align: center">
-                    <timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds.</timer>
-                </h2>
-            </div>
-            <div style="text-align: center">
-                <canvas id="myChart" height="400" width="600"></canvas>
-            </div>
-
-            <div ng-repeat="p in progress">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
-                         style="width: {{p.percentsDone}}%">
-                        <span class="sr-only">{{p.percentsDone}}% Complete (success)</span>
-                        {{p.percentsDone}}%
+        <div ng-show="currentChallenge" ng-repeat="p in progress">
+            <table class="table">
+                <tr>
+                    <td><strong>Donation Pledged:</strong></td>
+                    <td>${{p.amount}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Time Remaining:</strong></td>
+                    <td><timer interval="1000" end-time="p.endTime">{{days}} days, {{hours}} hours, {{minutes}} minutes, {{seconds}} seconds</timer></td>
+                </tr> 
+                <tr>
+                    <td><strong>Distance Remaining:</strong></td> 
+                    <td>{{p.distanceLeft}} meters</td>
+                </tr>
+            </table>
+            
+            <div class="row">
+                <div ng-repeat="p in progress" class="container">
+                    <div class="progress progress-striped">
+                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{{p.percentsDone}}" aria-valuemin="0" aria-valuemax="100"
+                             style="width: {{p.percentsDone}}%">
+                            <span class="sr-only">{{p.percentsDone}}% Complete (success)</span>
+                            {{p.percentsDone}}%
+                        </div>
                     </div>
-
-                    Run {{p.distanceLeft}} meters more or pay {{p.amount}}$
                 </div>
             </div>
         </div>
-        <div ng-show="finished" style="margin-top: 20px; margin-left: -15px">
-            <div ng-repeat="f in finished">
-                <div ng-if="f.payed" class="alert alert-danger">
-                    You didn't run {{f.distance}} and payed {{f.amount}}$ for that.
-                </div>
-                <div ng-if="!f.payed" class="alert alert-success">
-                    Congratulations! You successfully ran {{f.distance}}!
+        
+        <div class="row">
+            <div class="col-md-5">
+                <h4 ng-if="currentChallenge">How you're going so far</h4>
+                <canvas height="300" width="400" ng-if="currentChallenge" id="myChart"></canvas>
+                <div class="" style="height: 300px; width: 300px" ng-if="!currentChallenge">No active challenge</div>
+            </div>
+            <div class="col-md-7">
+                <div class="panel panel-default">
+                    <div class="panel-heading"><strong>Challenge History</strong></div>
+                    <!-- Table -->
+                    <table class="table">
+                        <tr>
+                            <th></th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Distance</th>
+                            <th>Amount</th>
+                        </tr>
+                        <tr ng-repeat="f in finished">
+                            <td><span ng-class="f.payed ? 'glyphicon glyphicon-heart pink' : 'glyphicon glyphicon-ok green'"></span></td>
+                            <td>{{f.startDate | date:'yyyy-MM-dd'}}</td>
+                            <td>{{f.endDate | date:'yyyy-MM-dd'}}</td>
+                            <td>{{f.distance}} meters</td>
+                            <td>${{f.amount}}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>

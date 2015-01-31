@@ -44,7 +44,7 @@ public class DeviceService {
             total += jsonArray.getJSONObject(i).getLong("value");
         }
         
-        return total;
+        return total * 1000;
     }
     
     public JSONObject getActivities(User user, Activity activity, 

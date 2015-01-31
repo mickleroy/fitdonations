@@ -1,6 +1,5 @@
 package au.com.shinetech.web.rest;
 
-import au.com.shinetech.config.WebConfigurer;
 import au.com.shinetech.domain.Activity;
 import au.com.shinetech.domain.User;
 import au.com.shinetech.repository.CharityRepository;
@@ -9,25 +8,21 @@ import au.com.shinetech.security.SecurityUtils;
 import au.com.shinetech.service.DeviceService;
 import au.com.shinetech.web.rest.dto.ChallengeDTO;
 import au.com.shinetech.web.rest.dto.ProgressDTO;
-import com.braintreegateway.*;
 import com.codahale.metrics.annotation.Timed;
 import au.com.shinetech.domain.Challenge;
 import au.com.shinetech.repository.ChallengeRepository;
 import org.apache.commons.lang.time.DateUtils;
 import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;

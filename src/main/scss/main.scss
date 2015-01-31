@@ -25,7 +25,7 @@ body {
     color: #333;
 }
 
-.development {
+/*.development {
     position: absolute;
     width: 149px;
     height: 149px;
@@ -36,7 +36,7 @@ body {
     background-image: url("../images/development_ribbon.png");
     background-position: center center;
     background-repeat: no-repeat;
-}
+}*/
 
 .browserupgrade {
     margin: 0.2em 0;
@@ -188,4 +188,21 @@ footer {
         }
     }
 }
+
+.progress {
+    height: 40px;
+}
+
+.progress-bar {
+    padding-top: 9px;
+}
+
+.pink {
+    color: violet;
+}
+
+.green {
+    color: #090;
+}
+
 
