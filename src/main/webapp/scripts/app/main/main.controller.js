@@ -5,7 +5,8 @@ angular.module('fitdonationsApp')
         Principal.identity().then(function(account) {
             $scope.account = account;
             $scope.isAuthenticated = Principal.isAuthenticated;
-
+            $scope.inProgress = false;
+            
             if ($scope.isAuthenticated) {
                 $scope.inProgress = true;
                 Challenge.progress(function(data) {
