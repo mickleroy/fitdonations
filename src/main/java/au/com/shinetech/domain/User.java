@@ -29,7 +29,7 @@ public class User extends AbstractAuditingEntity implements Serializable {
     private String login;
 
     @NotNull
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = true)
     private String uuid;
 
     @JsonIgnore

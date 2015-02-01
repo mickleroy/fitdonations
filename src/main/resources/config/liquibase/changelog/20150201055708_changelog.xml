@@ -5,7 +5,4 @@
             <column name="payment_msg" type="varchar(255)"/>
         </addColumn>
     </changeSet>
-    <changeSet author="michael (generated)" id="1422730639145-2">
-        <addNotNullConstraint columnDataType="varchar(255)" columnName="uuid" tableName="T_USER"/>
-    </changeSet>
 </databaseChangeLog>
